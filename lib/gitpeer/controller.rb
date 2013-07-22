@@ -4,8 +4,9 @@ class GitPeer::Controller < Scorched::Controller
   include Scorched::Options('uri_templates')
 
   def uri(name, **vars)
+    paths =  request.breadcrumb[0..-2].map { |x| x[:path] }
     template = uri_templates[name]
-    url template.expand(vars)
+    url "#{paths.join}#{template.expand(vars)}"
   end
 
   def captures

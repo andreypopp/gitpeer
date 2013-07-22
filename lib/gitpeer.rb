@@ -1,5 +1,8 @@
 require 'scorched'
 require 'uri_template'
+require 'roar/representer/json'
+require 'roar/representer/feature/hypermedia'
+require 'rugged'
 
 require 'gitpeer/version'
 
@@ -13,12 +16,46 @@ module GitPeer
       url template.expand(vars)
     end
 
+    def captures
+      return @_captures if @_captures
+      pattern = request.breadcrumb.last.mapping[:pattern]
+      @_captures = if pattern.is_a? URITemplate
+        Hash[pattern.variables.map{|v| v.to_sym}.zip(request.captures)]
+      else
+        request.captures
+      end
+      @_captures
+    end
+
+    def not_found
+      halt 404
+    end
+
     class << self
 
-      def uri(name, template)
-        unless template.is_a? URITemplate
-          template = URITemplate.new(template)
+      def configure(**options, &block)
+        p_mappings = @mappings
+        p_filters = @filters
+
+        Class::new(self) do
+          @mappings = p_mappings
+          @filters = p_filters
+          options.each_pair do |k, v|
+            define_method k.to_sym do
+              v
+            end
+          end
+          class_eval(&block) if block_given?
         end
+      end
+
+      def mount(prefix, controller)
+        self << {pattern: prefix, target: controller}
+        controller.config[:auto_pass] = true if controller < Scorched::Controller
+      end
+
+      def uri(name, template)
+        template = URITemplate.new(template) unless template.is_a? URITemplate
         uri_templates << { name => template }
       end
 
@@ -42,12 +79,41 @@ module GitPeer
     uri :blob,      '/blob/{id}'
     uri :object,    '/{id}'
 
+    get '/' do
+      'git'
+    end
     get :branch
     get :tag
-    get :commit
+    get :commit do
+      commit = or_404 { repo.lookup(captures[:id]) }
+      not_found unless commit.type == :commit
+      commit.extend(CommitRepresenter).to_json
+    end
     get :tree
     get :blob
     get :object
+
+    def or_404
+      result = begin
+        yield
+      rescue Rugged::OdbError
+        nil
+      rescue Rugged::InvalidError
+        nil
+      rescue Rugged::ObjectError
+        nil
+      end
+      not_found if result == nil
+      result
+    end
+
+    module CommitRepresenter
+      include Roar::Representer::JSON
+      include Roar::Representer::Feature::Hypermedia
+
+      property :message
+      property :author
+    end
   end
 
   class Code < API

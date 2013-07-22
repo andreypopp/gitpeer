@@ -1,3 +1,13 @@
+require 'rugged'
 require 'gitpeer'
 
-run GitPeer::Code
+repo = Rugged::Repository.new('.git')
+
+app = GitPeer::API.configure do
+  mount '/api/git',       GitPeer::Git.configure(repo: repo)
+  mount '/api/comments',  GitPeer::Comments
+  mount '/api/wiki',      GitPeer::Wiki
+  mount '/api/issues',    GitPeer::Issues
+end
+
+run app

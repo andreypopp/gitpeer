@@ -65,4 +65,21 @@ class GitPeer::Controller < Scorched::Controller
         end
       end
   end
+
+  module JSONHelpers
+    def json(obj, with: nil)
+      if with
+        _self = self
+        helpers = Module.new do
+          define_method :uri do |name, **vars|
+            _self.uri(name, **vars)
+          end
+        end
+        obj.extend(with).extend(helpers).to_json
+      else
+        obj.to_json
+      end
+    end
+  end
+
 end

@@ -9,7 +9,7 @@ require 'gitpeer/controller'
 
 module GitPeer
 
-  module GitController
+  module GitHelpers
     def or_404
       result = begin
         yield
@@ -25,25 +25,9 @@ module GitPeer
     end
   end
 
-  module JSONController
-    def json(obj, with: nil)
-      if with
-        _self = self
-        helpers = Module.new do
-          define_method :uri do |name, **vars|
-            _self.uri(name, **vars)
-          end
-        end
-        obj.extend(with).extend(helpers).to_json
-      else
-        obj.to_json
-      end
-    end
-  end
-
   class Git < Controller
-    include GitController
-    include JSONController
+    include Controller::JSONHelpers
+    include GitHelpers
 
     uri :branch,    '/branch/{id}'
     uri :tag,       '/tag/{id}'

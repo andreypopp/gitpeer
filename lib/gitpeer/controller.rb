@@ -26,6 +26,9 @@ class GitPeer::Controller < Scorched::Controller
   class << self
 
     def configure(**options, &block)
+      # Save mappigns and filters so we can copy them onto configured controller
+      # instance
+      # TODO: maybe we should just dup entire class before?
       p_mappings = @mappings
       p_filters = @filters
 

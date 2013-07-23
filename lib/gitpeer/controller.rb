@@ -15,6 +15,9 @@ class GitPeer::Controller < Scorched::Controller
     url "#{paths.join}#{template.expand(vars)}"
   end
 
+  ##
+  # Shortcut for request.captures which normalizes some difference
+  #
   def captures
     return @_captures if @_captures
     pattern = request.breadcrumb.last.mapping[:pattern]
@@ -46,6 +49,9 @@ class GitPeer::Controller < Scorched::Controller
     v
   end
 
+  ##
+  # Shortcut for halt 404
+  #
   def not_found
     halt 404
   end
@@ -152,7 +158,7 @@ class GitPeer::Controller < Scorched::Controller
 
       def register_representation(cls, representation = nil, name: nil, &block)
         unless representation or block_given?
-          raise ArgumentError, 'provide representation as an argument or as a block'
+          raise ArgumentError, 'provide a representation'
         end
         unless representation
           representation = Class::new(Representation, &block)

@@ -73,7 +73,9 @@ module GitPeer
       property :blob, resolve: true
       property :tree, resolve: true
       link :self do
-        uri :contents, ref: represented.ref, path: represented.path
+        uri :contents,
+          ref: represented.ref,
+          path: represented.path
       end
     end
 
@@ -83,7 +85,10 @@ module GitPeer
       property :after
       collection :commits, resolve: true
       link :self do
-        uri :history, ref: represented.ref, limit: represented.limit, after: represented.after
+        uri :history,
+          ref: represented.ref,
+          limit: represented.limit,
+          after: represented.after
       end
     end
 

@@ -3,7 +3,7 @@ require 'gitpeer/controller'
 require 'gitpeer/controller/json_representation'
 
 module GitPeer
-  class Git < Controller
+  class Repository < Controller
     include Controller::JSONRepresentation
 
     # XXX: it doesn't make effect right now because of
@@ -20,14 +20,6 @@ module GitPeer
     uri :contents,      '/contents/{ref}{/path*}'
     uri :history,       '/history/{ref}{?limit,after}'
     uri :path_history,  '/history/{ref}{/path*}{?limit,after}'
-
-    def default_branch
-      'master'
-    end
-
-    def description
-      nil
-    end
 
     get :repository do
       json Repository.new(name, description, default_branch)
@@ -148,6 +140,26 @@ module GitPeer
     end
 
     protected
+
+      def name
+        File.basename File.absolute_path repo_path
+      end
+
+      def default_branch
+        'master'
+      end
+
+      def description
+        nil
+      end
+
+      def repo_name
+        raise ArgumentError, 'unconfigured'
+      end
+
+      def repo
+        Rugged::Repository.new("#{repo_path}/.git")
+      end
 
       def branch_by_name(name)
         repo.ref("refs/heads/#{name}")

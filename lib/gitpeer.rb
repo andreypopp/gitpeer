@@ -38,10 +38,10 @@ module GitPeer
     uri :history,   '/history/{ref}{?limit,after}'
 
     get :contents do
-      path = captures[:path]
-      ref_name = captures[:ref]
+      path = param :path
+      ref_name = param :ref
 
-      ref = or_404 { repo.ref("refs/heads/#{ref_name}") }
+      ref = or_404 { ref_by_name(ref_name) }
       commit = or_404 { repo.lookup(ref.resolve.target) }
 
       obj = if path
@@ -57,11 +57,20 @@ module GitPeer
       json(path: path, ref: ref_name, commit: commit, tree: tree, blob: blob)
     end
 
-    get :history
+    get :history do
+      ref_name = param :ref
+      after = param :after
+      limit = param :limit, type: Integer, default: 30
+
+      ref = or_404 { ref_by_name(ref_name) }
+      commits = walk_from(after || ref.target)
+      commits = commits.take(limit).to_a
+      json(ref: ref_name, commits: commits, limit: limit, after: after)
+    end
 
     [:branch, :tag, :commit, :tree, :blob, :object].each do |type|
       get type do
-        obj = or_404 { repo.lookup(captures[:id]) }
+        obj = or_404 { repo.lookup(param :id) }
         not_found unless type == :object or obj.type == type
         json obj, with: representer_for(obj.type)
       end
@@ -103,6 +112,25 @@ module GitPeer
     end
 
     protected
+
+      def branch_by_name(name)
+        repo.ref("refs/heads/#{name}")
+      end
+
+      def tag_by_name(name)
+        repo.ref("refs/tags/#{name}")
+      end
+
+      def ref_by_name(name)
+        branch_by_name(name) || tag_by_name(name)
+      end
+
+      def walk_from(from_id)
+        walker = Rugged::Walker.new(repo)
+        walker.sorting(Rugged::SORT_TOPO)
+        walker.push(from_id)
+        walker
+      end
 
       def representer_for(type)
         case type

@@ -21,7 +21,25 @@ class GitPeer::Controller < Scorched::Controller
     else
       request.captures
     end
+    request.GET.each_pair do |k, v|
+      k = k.to_sym
+      @_captures[k] = v unless @_captures[k] != nil
+    end
     @_captures
+  end
+
+  def param(name, type: nil, default: nil)
+    v = captures[name]
+    begin
+      v = Integer(v) if type == Integer
+      v = Float(v) if type == Float
+      v = Date.parse(v) if type == Date
+      v = DateTime.parse(v) if type == DateTime
+      v = default if v == nil
+    rescue ArgumentError
+      halt 400
+    end
+    v
   end
 
   def not_found

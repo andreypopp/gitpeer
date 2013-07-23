@@ -1,5 +1,6 @@
 require 'rugged'
 require 'gitpeer/controller'
+require 'gitpeer/controller/json_representation'
 
 module GitPeer
   class Git < Controller

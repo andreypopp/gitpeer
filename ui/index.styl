@@ -1,0 +1,355 @@
+@import url('http://fonts.googleapis.com/css?family=Open+Sans:700,300')
+
+@import "type-utils";
+@import "foundation/variables"
+@import "foundation/components/global"
+@import "foundation/components/type"
+@import "foundation/components/forms"
+@import "foundation/components/buttons"
+@import "nib"
+
+bg = #f6f6f6
+color = #444
+hlcolor = lighten(bg, 70%)
+dkcolor = lighten(color, 70%)
+
+body
+  font-family: 'Open Sans', sans-serif
+  font-size: 100%
+  background: bg
+  color: color
+
+monospace()
+  font-family: 'Menlo', 'Monaco', monospace
+  color: color
+  font-weight: normal
+
+code
+  monospace()
+
+pre
+  monospace()
+  margin: 0
+
+ul, li
+  list-style: square
+  margin: 0
+
+small()
+  font-size: 75%
+  color: #888
+  a
+    color: #888
+    &:hover
+      color: #000
+
+.Auth
+  font-size: 80%
+
+  .meta
+    display: table-cell
+    height: 40px
+    vertical-align: middle
+    padding: 0 10px
+  img
+    margin-left: 10px
+    height: 40px
+    width: 40px
+
+.App
+
+  width: 600px
+  margin: 0 auto
+  margin-bottom: 5em
+  position: relative
+
+  .Auth
+    position: absolute
+    top: 0
+    right: 0
+
+  header
+    display: inline-block
+    position: relative
+    padding: 1.5em 0
+
+    font-weight: bold
+    cursor: pointer
+
+    a
+      color: color
+      text-decoration: none
+
+    .name
+      font-size: 170%
+      margin-right: 0.5em
+
+    .nav
+      display: inline-block
+      a
+        color: dkcolor
+        margin-right: 0.5em
+      a:hover
+        color: color
+
+  .CommitStatus
+    margin-top: 1em
+
+.TreeView
+  ul, li
+    padding: 0
+    list-style: none
+    font-size: 90%
+  li
+    margin-bottom: 0px
+    i
+      display: inline-block
+      width: 1em
+      margin-right: 0.7em
+      color: dkcolor
+    a
+      padding: 1px 5px
+      display: block
+      monospace()
+      color: color
+      text-decoration: none
+      &:hover
+        background: hlcolor
+
+.BlobView
+  font-size: 80%
+  background: hlcolor
+  color: color
+  padding: 1em
+  pre
+    line-height: 1.3em
+
+.Breadcrumb
+  monospace()
+  font-size: 13px
+  padding: 0
+  li
+    display: inline-block
+    a
+      padding: 5px
+      display: inline-block
+      text-align: right
+      text-decoration: none
+      color: #aaa
+  li:hover
+    background: hlcolor
+  li:after
+    color: #aaa
+    font-weight: normal
+    content: '/'
+    padding: 5px
+  li:last-child
+    a
+      color: color
+  li:last-child:after, li:first-child:after
+    content: ''
+    padding: 0
+
+.CommitStatus
+  margin-bottom: 1em
+  font-size: 80%
+  padding: 7px
+  clearfix()
+  .message, .author, .time, .sha
+    margin-right: 0.3em
+  .sha
+    monospace()
+    color: dkcolor
+  .message, .sha
+    float: left
+  .author, .time
+    font-size: 90%
+    color: dkcolor
+    float: right
+
+.HistoryView
+
+  .CommitStatus
+    background: transparent
+    margin: 0
+    cursor: pointer
+    &:hover
+      background: hlcolor
+
+  .date
+    margin-bottom: 0.5em
+    margin-top: 1em
+    font-size: 90%
+    padding: 15px
+    color: dkcolor
+    time
+      letter-spacing: 0.1em
+
+  .pager
+    user-select: none
+    margin: 1em
+    font-size: 80%
+    i
+      font-size: 70%
+
+    .prev, .next
+      display: inline-block
+      padding: 7px
+      &:hover
+        background: hlcolor
+
+.DiffView
+
+  .PatchView
+    margin-bottom: 1em
+
+  .HunkView
+    box-shadow: 0 0 3px dkcolor
+    margin-bottom: 1em
+
+    .line-comments
+      background: darken(bg, 3%)
+      box-shadow: inset 0px 1px 1px dkcolor
+      border-bottom: 2px solid bg
+      border-top: 1px solid lighten(dkcolor, 20%)
+
+    .CommentView
+      padding: 14px
+      border-bottom: 1px solid hlcolor
+      margin-bottom: 0
+      &:first-child
+        border-top: none
+      &:last-child
+        border-bottom: none
+
+    .CommentEditor
+      padding: 7px
+
+.PatchView
+  & > .meta
+    monospace()
+    font-size: 90%
+    padding: 10px
+    color: dkcolor
+
+.HunkView
+  .lines
+    position: relative
+  .header
+    monospace()
+    font-size: 80%
+    font-weight: normal
+    padding: 5px
+    color: dkcolor
+
+.SelectedLineRangeView
+  .range
+    position: relative
+
+  .LineView.selected
+    .toolbar, .line-comments
+      display: none
+
+  .LineView.selected:last-child
+    .toolbar, .line-comments
+      display: block
+
+
+.LineView
+  position: relative
+  user-select: none
+
+  pre
+    padding: 2px
+    font-size: 80%
+
+  .line
+    position: relative
+
+  .old_lineno, .new_lineno
+    font-size: 80%
+    display: inline-block
+    text-align: center
+    width: 2em
+    margin-right: 3px
+
+  .toolbar
+    display: none
+    position: absolute
+    right: -25px
+    width: 25px
+    text-align: right
+    bottom: 0px
+    cursor: pointer
+    a
+      color: dkcolor
+    a:hover
+      color: color
+
+  &:hover .toolbar
+    display: block
+  &.selected .toolbar
+    display: block
+
+  &.context
+    background: hlcolor
+    pre, code
+      color: dkcolor
+    &:hover
+      background: darken(hlcolor, 3%)
+  &.addition
+    background: #C2F5B5
+  &.addition:hover
+    background: darken(#C2F5B5, 3%)
+  &.deletion
+    background: #FCD5C7
+  &.deletion:hover
+    background: darken(#FCD5C7, 3%)
+
+  &.selected, &.highlighted
+    background: #FFF090
+
+  &.selected:hover
+    background: darken(#FBFFE0, 3%)
+
+  &.highlighted:hover
+    background: #FFF090
+
+.CommitView
+  .CommentView, .CommentEditor
+    border-top: 1px solid lighten(dkcolor, 50%)
+
+.CommentView
+  font-size: 85%
+  padding: 14px
+  .content
+    margin-bottom: 0.3em
+  .meta
+    color: dkcolor
+    text-align: right
+    font-size: 80%
+  .author
+    margin-right: 0.5em
+
+.CommentEditor
+  position: relative
+  button
+    margin: 0
+    margin-right: 5px
+    bottom: 0
+    left: 20px
+    text-transform: uppercase
+    i
+      margin-right: 5px
+  textarea
+    margin: 7px
+    margin: 0
+    height: 1em
+    resize: vertical
+    border: none
+    font-size: 90%
+    box-shadow: none
+    background: inherit
+    &:focus
+      box-shadow: none
+      border: none

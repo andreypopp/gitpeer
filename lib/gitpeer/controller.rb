@@ -94,10 +94,6 @@ class GitPeer::Controller < Scorched::Controller
 
   module JSONRepresentation
 
-    def self.included(controller)
-      controller.extend(ClassMethods)
-    end
-
     class Representation < Roar::Decorator
       include Roar::Representer::JSON
       include Roar::Representer::Feature::Hypermedia
@@ -112,41 +108,39 @@ class GitPeer::Controller < Scorched::Controller
       end
 
       class << self
-        def embed(name, **options)
-          options[:extend] = lambda do |o, **options|
-            options[:controller].representations.query(o.class)
+        def property(name, **options, &block)
+          if options[:resolve] and not options[:extend]
+            options[:extend] = lambda do |o, **options|
+              options[:controller].representation_for(o.class)
+            end
           end
-          property name, **options
+          super name, **options, &block
         end
 
-        def embed_collection(name, **options)
-          options[:extend] = lambda do |o, **options|
-            options[:controller].representation_for(o.class)
-          end
-          collection name, **options
-        end
-
-        def embed_value_collection(name, **options)
+        def value(name, **options, &block)
           options[:getter] = lambda { |*| self[name] }
-          options[:extend] = lambda do |o, **options|
-            options[:controller].representation_for(o.class)
-          end
-          collection name, **options
+          property name, **options, &block
         end
 
-        def embed_value(name, **options)
-          options[:extend] = lambda do |o, **options|
-            options[:controller].representation_for(o.class)
+        def collection(name, **options, &block)
+          if options[:resolve] and not options[:extend]
+            options[:extend] = lambda do |o, **options|
+              options[:controller].representation_for(o.class)
+            end
           end
-          value name, **options
+          super name, **options, &block
         end
 
-        def value(name, **options)
+        def value_collection(name, **options, &block)
           options[:getter] = lambda { |*| self[name] }
-          property name, **options
+          collection name, **options, &block
         end
       end
 
+    end
+
+    def self.included(controller)
+      controller.extend(ClassMethods)
     end
 
     module ClassMethods
@@ -156,8 +150,14 @@ class GitPeer::Controller < Scorched::Controller
         @representations
       end
 
-      def register_representation(cls, representation)
-        representations.register(representation, cls)
+      def register_representation(cls, representation = nil, name: nil, &block)
+        unless representation or block_given?
+          raise ArgumentError, 'provide representation as an argument or as a block'
+        end
+        unless representation
+          representation = Class::new(Representation, &block)
+        end
+        representations.register(representation, cls, name: name)
       end
 
     end
@@ -187,5 +187,4 @@ class GitPeer::Controller < Scorched::Controller
       end
     end
   end
-
 end

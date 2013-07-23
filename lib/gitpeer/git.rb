@@ -32,7 +32,7 @@ module GitPeer
       blob = obj.is_a?(Rugged::Blob) ? obj : nil
       contents = {path: path, ref: ref_name, commit: commit, tree: tree, blob: blob}
 
-      json contents, with: Representations::Contents
+      json contents, with: ContentsRepresentation
     end
 
     get :history do
@@ -44,7 +44,7 @@ module GitPeer
       commits = walk_from(after || ref.target)
       commits = commits.take(limit).to_a
       history = {ref: ref_name, commits: commits, limit: limit, after: after}
-      json history, with: Representations::History
+      json history, with: HistoryRepresentation
     end
 
     [:branch, :tag, :commit, :tree, :blob, :object].each do |type|
@@ -55,59 +55,49 @@ module GitPeer
       end
     end
 
-    module Representations
-      include Controller::JSONRepresentation
-
-      class Commit < Representation
-        property :oid, as: :id
-        property :message
-        property :author
-        property :committer
-        property :tree_id
-        link :self do uri :commit, id: represented.oid end
-        link :tree do uri :tree, id: represented.tree_id end
-      end
-
-      class Blob < Representation
-        property :oid, as: :id
-        property :content
-        link :self do uri :blob, id: represented.oid end
-      end
-
-      class TreeEntry < Representation
-        value :oid, as: :id
-        value :type
-        value :name
-        link :self do
-          uri represented[:type], id: represented[:oid]
-        end
-      end
-
-      class Tree < Representation
-        property :oid, as: :id
-        collection :entries, decorator: TreeEntry
-        link :self do uri :tree, id: represented.oid end
-      end
-
-      class Contents < Representation
-        value :path
-        value :ref
-        embed_value :commit
-        embed_value :blob
-        embed_value :tree
-      end
-
-      class History < Representation
-        value :ref
-        value :limit
-        value :after
-        embed_value_collection :commits
-      end
+    class ContentsRepresentation < Representation
+      value :path
+      value :ref
+      value :commit, resolve: true
+      value :blob, resolve: true
+      value :tree, resolve: true
     end
 
-    register_representation Rugged::Commit, Representations::Commit
-    register_representation Rugged::Blob, Representations::Blob
-    register_representation Rugged::Tree, Representations::Tree
+    class HistoryRepresentation < Representation
+      value :ref
+      value :limit
+      value :after
+      value_collection :commits, resolve: true
+    end
+
+    class TreeEntryRepresentation < Representation
+      value :oid, as: :id
+      value :type
+      value :name
+      link :self do uri represented[:type], id: represented[:oid] end
+    end
+
+    register_representation Rugged::Commit do
+      property :oid, as: :id
+      property :message
+      property :author
+      property :committer
+      property :tree_id
+      link :self do uri :commit, id: represented.oid end
+      link :tree do uri :tree, id: represented.tree_id end
+    end
+
+    register_representation Rugged::Blob do
+      property :oid, as: :id
+      property :content
+      link :self do uri :blob, id: represented.oid end
+    end
+
+    register_representation Rugged::Tree do
+      property :oid, as: :id
+      collection :entries, decorator: TreeEntryRepresentation
+      link :self do uri :tree, id: represented.oid end
+    end
 
     protected
 

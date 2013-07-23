@@ -10,14 +10,15 @@ module GitPeer
     # https://github.com/Wardrop/Scorched/issues/15
     config[:strip_trailing_slash] = :ignore
 
-    uri :branch,    '/branch/{id}'
-    uri :tag,       '/tag/{id}'
-    uri :commit,    '/commit/{id}'
-    uri :tree,      '/tree/{id}'
-    uri :blob,      '/blob/{id}'
-    uri :object,    '/{id}'
-    uri :contents,  '/contents/{ref}{/path*}'
-    uri :history,   '/history/{ref}{?limit,after}'
+    uri :branch,        '/branch/{id}'
+    uri :tag,           '/tag/{id}'
+    uri :commit,        '/commit/{id}'
+    uri :tree,          '/tree/{id}'
+    uri :blob,          '/blob/{id}'
+    uri :object,        '/{id}'
+    uri :contents,      '/contents/{ref}{/path*}'
+    uri :history,       '/history/{ref}{?limit,after}'
+    uri :path_history,  '/history/{ref}{/path*}{?limit,after}'
 
     get :contents do
       path = param :path
@@ -44,10 +45,11 @@ module GitPeer
       limit = param :limit, type: Integer, default: 30
 
       ref = or_404 { ref_by_name(ref_name) }
-      commits = walk_from(after || ref.target)
-      commits = commits.take(limit).to_a
+      commits = walk_from(after || ref.target).take(limit).to_a
       json History.new(ref_name, limit, after, commits)
     end
+
+    get :path_history
 
     [:branch, :tag, :commit, :tree, :blob, :object].each do |type|
       get type do

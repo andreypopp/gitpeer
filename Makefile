@@ -7,5 +7,8 @@ run:
 shell:
 	@bundle exec irb
 
+test:
+	@rspec specs/
+
 install:
 	@bundle

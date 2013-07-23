@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rugged", "~> 0.19"
 
   spec.add_development_dependency "bundler", "~> 1.3"
+  spec.add_development_dependency "rspec", "~> 1.3"
   spec.add_development_dependency "thin"
   spec.add_development_dependency "rerun", "~> 0.8"
 end

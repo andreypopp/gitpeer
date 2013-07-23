@@ -1,4 +1,7 @@
 require 'scorched'
+require 'roar/decorator'
+require 'roar/representer/json'
+require 'roar/representer/feature/hypermedia'
 
 class GitPeer::Controller < Scorched::Controller
   include Scorched::Options('uri_templates')
@@ -66,7 +69,25 @@ class GitPeer::Controller < Scorched::Controller
       end
   end
 
-  module JSONHelpers
+  module JSONRepresentation
+    class Representation < Roar::Decorator
+      include Roar::Representer::JSON
+      include Roar::Representer::Feature::Hypermedia
+
+      def self.hash_property(name, as: nil)
+        property name, as: as, getter: lambda { |*| self[name] }
+      end
+
+      def to_hash(options={})
+        @options = options
+        super(options)
+      end
+
+      def uri(name, **vars)
+        @options[:controller].uri(name, **vars)
+      end
+    end
+
     def json(obj, with: nil)
       if with
         _self = self
@@ -75,7 +96,7 @@ class GitPeer::Controller < Scorched::Controller
             _self.uri(name, **vars)
           end
         end
-        obj.extend(with).extend(helpers).to_json
+        with.new(obj).to_json(controller: self)
       else
         obj.to_json
       end

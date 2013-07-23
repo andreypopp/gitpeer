@@ -1,6 +1,4 @@
 require 'uri_template'
-require 'roar/representer/json'
-require 'roar/representer/feature/hypermedia'
 require 'rugged'
 
 require 'gitpeer/version'
@@ -25,12 +23,11 @@ module GitPeer
   end
 
   class Git < Controller
-    include Controller::JSONHelpers
+    include Controller::JSONRepresentation
     include GitHelpers
 
     uri :branch,    '/branch/{id}'
     uri :tag,       '/tag/{id}'
-    uri :commit,    '/commit/{id}'
     uri :commit,    '/commit/{id}'
     uri :tree,      '/tree/{id}'
     uri :blob,      '/blob/{id}'
@@ -44,39 +41,37 @@ module GitPeer
       end
     end
 
-    module CommitRepresenter
-      include Roar::Representer::JSON
-      include Roar::Representer::Feature::Hypermedia
+    module Representations
+      include Controller::JSONRepresentation
 
-      property :oid, as: :id
-      property :message
-      property :author
-      property :committer
-      property :tree_id
-      link :self do uri :commit, id: oid end
-      link :tree do uri :tree, id: tree_id end
-    end
-
-    module TreeEntryRepresenter
-      include Roar::Representer::JSON
-      include Roar::Representer::Feature::Hypermedia
-
-      def self.hash_property(name, as: nil)
-        property name, as: as, getter: lambda { |*| self[name] }
+      class Commit < Representation
+        property :oid, as: :id
+        property :message
+        property :author
+        property :committer
+        property :tree_id
+        link :self do uri :commit, id: represented.oid end
+        link :tree do uri :tree, id: represented.tree_id end
       end
 
-      hash_property :oid, as: :id
-      hash_property :type
-      hash_property :name
-    end
+      class Blob < Representation
+        property :oid, as: :id
+        property :content
+        link :self do uri :blob, id: represented.oid end
+      end
 
-    module TreeRepresenter
-      include Roar::Representer::JSON
-      include Roar::Representer::Feature::Hypermedia
+      class TreeEntry < Representation
+        hash_property :oid, as: :id
+        hash_property :type
+        hash_property :name
+        link :self do uri :object, id: represented[:oid] end
+      end
 
-      property :oid, as: :id
-      collection :entries, extend: TreeEntryRepresenter
-      link :self do uri :tree, id: oid end
+      class Tree < Representation
+        property :oid, as: :id
+        collection :entries, extend: TreeEntry
+        link :self do uri :tree, id: represented.oid end
+      end
     end
 
     protected
@@ -84,9 +79,11 @@ module GitPeer
       def representer_for(type)
         case type
         when :commit
-          CommitRepresenter
+          Representations::Commit
         when :tree
-          TreeRepresenter
+          Representations::Tree
+        when :blob
+          Representations::Blob
         else
           raise "don't know how to represent #{type}"
         end

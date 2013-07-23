@@ -5,6 +5,10 @@ module GitPeer
   class Git < Controller
     include Controller::JSONRepresentation
 
+    # XXX: it doesn't make effect right now because of
+    # https://github.com/Wardrop/Scorched/issues/15
+    config[:strip_trailing_slash] = :ignore
+
     uri :branch,    '/branch/{id}'
     uri :tag,       '/tag/{id}'
     uri :commit,    '/commit/{id}'

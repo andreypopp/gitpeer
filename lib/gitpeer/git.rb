@@ -30,9 +30,7 @@ module GitPeer
 
       tree = obj.is_a?(Rugged::Tree) ? obj : nil
       blob = obj.is_a?(Rugged::Blob) ? obj : nil
-      contents = {path: path, ref: ref_name, commit: commit, tree: tree, blob: blob}
-
-      json contents, with: ContentsRepresentation
+      json Contents.new(path, ref_name, commit, blob, tree)
     end
 
     get :history do
@@ -43,38 +41,46 @@ module GitPeer
       ref = or_404 { ref_by_name(ref_name) }
       commits = walk_from(after || ref.target)
       commits = commits.take(limit).to_a
-      history = {ref: ref_name, commits: commits, limit: limit, after: after}
-      json history, with: HistoryRepresentation
+      json History.new(ref_name, limit, after, commits)
     end
 
     [:branch, :tag, :commit, :tree, :blob, :object].each do |type|
       get type do
         obj = or_404 { repo.lookup(param :id) }
         not_found unless type == :object or obj.type == type
-        json obj, with: representer_for(obj.type)
+        json obj
       end
     end
 
-    class ContentsRepresentation < Representation
-      value :path
-      value :ref
-      value :commit, resolve: true
-      value :blob, resolve: true
-      value :tree, resolve: true
-    end
-
-    class HistoryRepresentation < Representation
-      value :ref
-      value :limit
-      value :after
-      value_collection :commits, resolve: true
-    end
+    Contents = Struct.new(:path, :ref, :commit, :blob, :tree)
+    History = Struct.new(:ref, :limit, :after, :commits)
 
     class TreeEntryRepresentation < Representation
       value :oid, as: :id
       value :type
       value :name
       link :self do uri represented[:type], id: represented[:oid] end
+    end
+
+    register_representation Contents do
+      property :path
+      property :ref
+      property :commit, resolve: true
+      property :blob, resolve: true
+      property :tree, resolve: true
+      link :self do
+        uri :contents, ref: represented.ref, path: represented.path
+      end
+    end
+
+    register_representation History do
+      property :ref
+      property :limit
+      property :after
+      collection :commits, resolve: true
+      link :self do
+        uri :history, ref: represented.ref, limit: represented.limit, after: represented.after
+      end
     end
 
     register_representation Rugged::Commit do

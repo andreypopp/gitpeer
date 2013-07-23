@@ -162,7 +162,7 @@ class GitPeer::Controller < Scorched::Controller
 
     end
 
-    def representation_for(cls, name: nil)
+    def representation_for(cls, name: nil, raise_on_missing: true)
       now = self.class
       while now do
         continue unless now.respond_to? :representations
@@ -170,17 +170,12 @@ class GitPeer::Controller < Scorched::Controller
         return representation if representation
         now = now.superclass
       end
-      raise GitPeer::Registry::LookupError, cls
+      raise GitPeer::Registry::LookupError, cls if raise_on_missing
     end
 
     def json(obj, with: nil)
+      with = representation_for(obj.class, raise_on_missing: false) unless with
       if with
-        _self = self
-        helpers = Module.new do
-          define_method :uri do |name, **vars|
-            _self.uri(name, **vars)
-          end
-        end
         with.new(obj).to_json(controller: self)
       else
         obj.to_json

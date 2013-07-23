@@ -1,5 +1,6 @@
 require 'rugged'
 require 'gitpeer'
+require 'gitpeer/git'
 
 repo = Rugged::Repository.new('.git')
 

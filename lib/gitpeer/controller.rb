@@ -1,4 +1,5 @@
 require 'json'
+require 'uri_template'
 require 'scorched'
 require 'roar/decorator'
 require 'roar/representer/json'

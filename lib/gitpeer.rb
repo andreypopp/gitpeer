@@ -16,6 +16,8 @@ module GitPeer
         nil
       rescue Rugged::ObjectError
         nil
+      rescue Rugged::TreeError
+        nil
       end
       not_found if result == nil
       result
@@ -32,6 +34,30 @@ module GitPeer
     uri :tree,      '/tree/{id}'
     uri :blob,      '/blob/{id}'
     uri :object,    '/{id}'
+    uri :contents,  '/contents/{ref}{/path*}'
+    uri :history,   '/history/{ref}{?limit,after}'
+
+    get :contents do
+      path = captures[:path]
+      ref_name = captures[:ref]
+
+      ref = or_404 { repo.ref("refs/heads/#{ref_name}") }
+      commit = or_404 { repo.lookup(ref.resolve.target) }
+
+      obj = if path
+        entry = or_404 { commit.tree.path(path) }
+        repo.lookup(entry[:oid])
+      else
+        commit.tree
+      end
+
+      tree = obj.is_a?(Rugged::Tree) ? obj : nil
+      blob = obj.is_a?(Rugged::Blob) ? obj : nil
+
+      json(path: path, ref: ref_name, commit: commit, tree: tree, blob: blob)
+    end
+
+    get :history
 
     [:branch, :tag, :commit, :tree, :blob, :object].each do |type|
       get type do
@@ -64,7 +90,9 @@ module GitPeer
         hash_property :oid, as: :id
         hash_property :type
         hash_property :name
-        link :self do uri :object, id: represented[:oid] end
+        link :self do
+          uri represented[:type], id: represented[:oid]
+        end
       end
 
       class Tree < Representation
@@ -91,16 +119,7 @@ module GitPeer
 
   end
 
-  class Code < Controller
-    uri :contents,  '/contents/{ref}{/path*}'
-    uri :history,   '/history/{ref}{?limit,after}'
-
-    get :contents
-    get :history
-  end
-
   class Comments < Controller
-
     uri :comments,  '/{oid}{?limit,after}'
     uri :comment,   '/{oid}/{cid}'
 

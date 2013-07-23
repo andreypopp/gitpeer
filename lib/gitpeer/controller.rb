@@ -1,3 +1,4 @@
+require 'json'
 require 'scorched'
 require 'roar/decorator'
 require 'roar/representer/json'

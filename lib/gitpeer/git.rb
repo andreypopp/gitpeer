@@ -30,8 +30,9 @@ module GitPeer
 
       tree = obj.is_a?(Rugged::Tree) ? obj : nil
       blob = obj.is_a?(Rugged::Blob) ? obj : nil
+      contents = {path: path, ref: ref_name, commit: commit, tree: tree, blob: blob}
 
-      json(path: path, ref: ref_name, commit: commit, tree: tree, blob: blob)
+      json contents, with: Representations::Contents
     end
 
     get :history do
@@ -42,7 +43,8 @@ module GitPeer
       ref = or_404 { ref_by_name(ref_name) }
       commits = walk_from(after || ref.target)
       commits = commits.take(limit).to_a
-      json(ref: ref_name, commits: commits, limit: limit, after: after)
+      history = {ref: ref_name, commits: commits, limit: limit, after: after}
+      json history, with: Representations::History
     end
 
     [:branch, :tag, :commit, :tree, :blob, :object].each do |type|
@@ -73,9 +75,9 @@ module GitPeer
       end
 
       class TreeEntry < Representation
-        hash_property :oid, as: :id
-        hash_property :type
-        hash_property :name
+        value :oid, as: :id
+        value :type
+        value :name
         link :self do
           uri represented[:type], id: represented[:oid]
         end
@@ -83,10 +85,29 @@ module GitPeer
 
       class Tree < Representation
         property :oid, as: :id
-        collection :entries, extend: TreeEntry
+        collection :entries, decorator: TreeEntry
         link :self do uri :tree, id: represented.oid end
       end
+
+      class Contents < Representation
+        value :path
+        value :ref
+        embed_value :commit
+        embed_value :blob
+        embed_value :tree
+      end
+
+      class History < Representation
+        value :ref
+        value :limit
+        value :after
+        embed_value_collection :commits
+      end
     end
+
+    register_representation Rugged::Commit, Representations::Commit
+    register_representation Rugged::Blob, Representations::Blob
+    register_representation Rugged::Tree, Representations::Tree
 
     protected
 
@@ -107,19 +128,6 @@ module GitPeer
         walker.sorting(Rugged::SORT_TOPO)
         walker.push(from_id)
         walker
-      end
-
-      def representer_for(type)
-        case type
-        when :commit
-          Representations::Commit
-        when :tree
-          Representations::Tree
-        when :blob
-          Representations::Blob
-        else
-          raise "don't know how to represent #{type}"
-        end
       end
 
       def or_404

@@ -4,6 +4,7 @@ require 'scorched'
 require 'roar/decorator'
 require 'roar/representer/json'
 require 'roar/representer/feature/hypermedia'
+require 'gitpeer/registry'
 
 class GitPeer::Controller < Scorched::Controller
   include Scorched::Options('uri_templates')
@@ -31,15 +32,17 @@ class GitPeer::Controller < Scorched::Controller
 
   def param(name, type: nil, default: nil)
     v = captures[name]
-    begin
-      v = Integer(v) if type == Integer
-      v = Float(v) if type == Float
-      v = Date.parse(v) if type == Date
-      v = DateTime.parse(v) if type == DateTime
-      v = default if v == nil
-    rescue ArgumentError
-      halt 400
+    if v
+      begin
+        v = Integer(v) if type == Integer
+        v = Float(v) if type == Float
+        v = Date.parse(v) if type == Date
+        v = DateTime.parse(v) if type == DateTime
+      rescue ArgumentError
+        halt 400
+      end
     end
+    v = default if v == nil
     v
   end
 
@@ -90,13 +93,14 @@ class GitPeer::Controller < Scorched::Controller
   end
 
   module JSONRepresentation
+
+    def self.included(controller)
+      controller.extend(ClassMethods)
+    end
+
     class Representation < Roar::Decorator
       include Roar::Representer::JSON
       include Roar::Representer::Feature::Hypermedia
-
-      def self.hash_property(name, as: nil)
-        property name, as: as, getter: lambda { |*| self[name] }
-      end
 
       def to_hash(options={})
         @options = options
@@ -106,6 +110,67 @@ class GitPeer::Controller < Scorched::Controller
       def uri(name, **vars)
         @options[:controller].uri(name, **vars)
       end
+
+      class << self
+        def embed(name, **options)
+          options[:extend] = lambda do |o, **options|
+            options[:controller].representations.query(o.class)
+          end
+          property name, **options
+        end
+
+        def embed_collection(name, **options)
+          options[:extend] = lambda do |o, **options|
+            options[:controller].representation_for(o.class)
+          end
+          collection name, **options
+        end
+
+        def embed_value_collection(name, **options)
+          options[:getter] = lambda { |*| self[name] }
+          options[:extend] = lambda do |o, **options|
+            options[:controller].representation_for(o.class)
+          end
+          collection name, **options
+        end
+
+        def embed_value(name, **options)
+          options[:extend] = lambda do |o, **options|
+            options[:controller].representation_for(o.class)
+          end
+          value name, **options
+        end
+
+        def value(name, **options)
+          options[:getter] = lambda { |*| self[name] }
+          property name, **options
+        end
+      end
+
+    end
+
+    module ClassMethods
+      def representations
+        return @representations if @representations
+        @representations = GitPeer::Registry.new()
+        @representations
+      end
+
+      def register_representation(cls, representation)
+        representations.register(representation, cls)
+      end
+
+    end
+
+    def representation_for(cls, name: nil)
+      now = self.class
+      while now do
+        continue unless now.respond_to? :representations
+        representation = now.representations.query(cls, name: name)
+        return representation if representation
+        now = now.superclass
+      end
+      raise GitPeer::Registry::LookupError, cls
     end
 
     def json(obj, with: nil)

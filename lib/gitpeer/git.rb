@@ -10,6 +10,7 @@ module GitPeer
     # https://github.com/Wardrop/Scorched/issues/15
     config[:strip_trailing_slash] = :ignore
 
+    uri :repository,    '/'
     uri :branch,        '/branch/{id}'
     uri :tag,           '/tag/{id}'
     uri :commit,        '/commit/{id}'
@@ -19,6 +20,18 @@ module GitPeer
     uri :contents,      '/contents/{ref}{/path*}'
     uri :history,       '/history/{ref}{?limit,after}'
     uri :path_history,  '/history/{ref}{/path*}{?limit,after}'
+
+    def default_branch
+      'master'
+    end
+
+    def description
+      nil
+    end
+
+    get :repository do
+      json Repository.new(name, description, default_branch)
+    end
 
     get :contents do
       path = param :path
@@ -61,12 +74,29 @@ module GitPeer
 
     Contents = Struct.new(:path, :ref, :commit, :blob, :tree)
     History = Struct.new(:ref, :limit, :after, :commits)
+    Repository = Struct.new(:name, :description, :default_branch)
 
     class TreeEntryRepresentation < Representation
       value :oid, as: :id
       value :type
       value :name
       link :self do uri represented[:type], id: represented[:oid] end
+    end
+
+    register_representation Repository do
+      property :name
+      property :description
+      property :default_branch
+
+      link :self do
+        uri :repository
+      end
+      link :history do
+        uri :history, ref: represented.default_branch
+      end
+      link :contents do
+        uri :contents, ref: represented.default_branch
+      end
     end
 
     register_representation Contents do

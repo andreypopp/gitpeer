@@ -9,10 +9,14 @@ app = GitPeer::Controller.configure do
   # https://github.com/Wardrop/Scorched/issues/15
   config[:strip_trailing_slash] = :ignore
 
-  mount '/api/git',       GitPeer::Git.configure(repo: repo)
+  mount '/api/git',       GitPeer::Git.configure(repo: repo, name: 'GitPeer')
   mount '/api/comments',  GitPeer::Comments
   mount '/api/wiki',      GitPeer::Wiki
   mount '/api/issues',    GitPeer::Issues
+end
+
+map '/a' do
+  run Rack::Directory.new('ui/assets')
 end
 
 run app

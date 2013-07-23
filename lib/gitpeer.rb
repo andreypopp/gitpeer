@@ -1,5 +1,4 @@
 require 'uri_template'
-require 'representable/json/hash'
 require 'roar/representer/json'
 require 'roar/representer/feature/hypermedia'
 require 'rugged'
@@ -59,8 +58,16 @@ module GitPeer
     end
 
     module TreeEntryRepresenter
-      include Representable::JSON::Hash
+      include Roar::Representer::JSON
       include Roar::Representer::Feature::Hypermedia
+
+      def self.hash_property(name, as: nil)
+        property name, as: as, getter: lambda { |*| self[name] }
+      end
+
+      hash_property :oid, as: :id
+      hash_property :type
+      hash_property :name
     end
 
     module TreeRepresenter
@@ -69,9 +76,7 @@ module GitPeer
 
       property :oid, as: :id
       collection :entries, extend: TreeEntryRepresenter
-      link :self do
-        uri :tree, id: oid
-      end
+      link :self do uri :tree, id: oid end
     end
 
     protected

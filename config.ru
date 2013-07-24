@@ -2,6 +2,28 @@ require 'scorched'
 require 'gitpeer'
 require 'gitpeer/repository'
 
+class Rack::Page < Rack::File
+  def _call(env)
+    unless ALLOWED_VERBS.include? env["REQUEST_METHOD"]
+      return fail(405, "Method Not Allowed")
+    end
+
+    @path = @root
+
+    available = begin
+      File.file?(@path) && File.readable?(@path)
+    rescue SystemCallError
+      false
+    end
+
+    if available
+      serving(env)
+    else
+      fail(404, "File not found: #{path_info}")
+    end
+  end
+end
+
 class App < GitPeer::Controller
   uri :page_root,          '/'
   uri :page_contents,      '/contents/{ref}{/path*}'
@@ -11,7 +33,8 @@ class App < GitPeer::Controller
   uri :page_tree,          '/tree/{id}'
   uri :page_blob,          '/blob/{id}'
 
-  assets = Rack::Directory.new('ui/assets')
+  page = Rack::Page.new('ui/index.html')
+  assets = Rack::File.new('ui/assets')
   git = GitPeer::Repository.configure(repo_path: '.')
 
   git.extend_representation_for Rugged::Commit do
@@ -56,6 +79,7 @@ class App < GitPeer::Controller
 
   mount       '/api',   git
   mount_rack  '/a',     assets
+  mount_rack            page
 end
 
 run App

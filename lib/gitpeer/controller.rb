@@ -114,13 +114,17 @@ class GitPeer::Controller < Scorched::Controller
       self << {pattern: prefix, target: controller}
     end
 
-    def mount_rack(prefix, app)
+    def mount_rack(prefix, app = nil)
+      unless app
+        app = prefix
+        prefix = nil
+      end
       adapter = lambda do |env|
         env = env.dup
-        env['PATH_INFO'] = env['PATH_INFO'][prefix.length..-1]
+        env['PATH_INFO'] = env['PATH_INFO'][prefix.length..-1] if prefix
         app.call(env)
       end
-      self << {pattern: prefix, target: adapter}
+      self << {pattern: prefix ? prefix : compile('/**'), target: adapter}
     end
 
     ##

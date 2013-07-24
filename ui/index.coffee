@@ -24,7 +24,7 @@ TreeView = createComponent
       when 'tree' then 'icon-folder-close-alt'
       else 'icon-file-alt'
     `<li class="TreeEntry">
-      <a href={entry._links.self_html.href}>
+      <a href={entry._links.contents_html.href}>
         <i class={icon}></i>{entry.name}
       </a>
      </li>`

@@ -23,7 +23,7 @@ class exports.Author extends Record
     time: Date
 
 class exports.Commit extends Record
-  url: -> "/api/git/commit/#{this.id}"
+  url: -> url "/api/git/commit/#{this.id}"
 
   @define
     message: null,
@@ -34,7 +34,7 @@ class exports.Commit extends Record
     _links: null
 
   @lazyProperty 'comments', ->
-    new exports.Comments([], url: "/api/comments/#{this.id}")
+    new exports.Comments([], url: url "/api/comments/#{this.id}")
 
 class exports.Blob extends Record
   @define
@@ -88,7 +88,7 @@ class exports.History extends Record
     params.limit = pagination.limit if pagination.limit?
     params.after = pagination.after if pagination.after?
     query = unless $.isEmptyObject(params) then "?#{$.param(params)}" else ''
-    "/api/history/#{this.ref}#{query}"
+    url "/api/history/#{this.ref}#{query}"
 
   parse: (resp, options) ->
     if resp.commits.length == this.pagination.limit

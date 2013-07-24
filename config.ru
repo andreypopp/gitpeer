@@ -37,6 +37,10 @@ class App < GitPeer::Controller
   assets = Rack::File.new('ui/assets')
   git = GitPeer::Repository.configure(repo_path: '.')
 
+  git::TreeEntryRepresentation.class_eval do
+    link :contents_html do uri :page_contents end
+  end
+
   git.extend_representation_for Rugged::Commit do
     link :self_html do uri :page_commit, id: represented.oid end
     link :tree_html do uri :page_tree, id: represented.tree_id end

@@ -91,6 +91,7 @@ module GitPeer::Controller::JSONRepresentation
   end
 
   def json(obj, with: nil)
+    response['Content-Type'] = 'application/json'
     with = representation_for(obj.class, raise_on_missing: false) unless with
     if with
       with.new(obj).to_json(controller: self)

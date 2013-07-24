@@ -5,9 +5,14 @@ require 'scorched'
 class GitPeer::Controller < Scorched::Controller
   include Scorched::Options('uri_templates')
 
+  config[:strip_trailing_slash] = :ignore
+
+  ##
+  # Generate URI out of the template
+  #
   def uri(name, **vars)
     paths =  request.breadcrumb[0..-2].map { |x| x[:path] }
-    template = uri_templates[name]
+    template = uri_templates[name] or URITemplate.new(name)
     url "#{paths.join}#{template.expand(vars)}"
   end
 
@@ -29,6 +34,10 @@ class GitPeer::Controller < Scorched::Controller
     @_captures
   end
 
+  ##
+  # Shortcut for getting a param out of captures which also can perform 
+  # validation and assign a default value
+  #
   def param(name, type: nil, default: nil)
     v = captures[name]
     if v
@@ -54,6 +63,9 @@ class GitPeer::Controller < Scorched::Controller
 
   class << self
 
+    ##
+    # Configure controller with class methods or by passing a block
+    #
     def configure(**options, &block)
       # Save mappigns and filters so we can copy them onto configured controller
       # instance
@@ -65,19 +77,25 @@ class GitPeer::Controller < Scorched::Controller
         @mappings = p_mappings.clone if p_mappings
         @filters = p_filters.clone if p_filters
         options.each_pair do |k, v|
-          define_method k.to_sym do
-            v
-          end
+          define_method k.to_sym do v end
         end
         class_eval(&block) if block_given?
       end
     end
 
+    ##
+    # Mount another controller under prefix
+    #
     def mount(prefix, controller)
       self << {pattern: prefix, target: controller}
-      controller.config[:auto_pass] = true if controller < Scorched::Controller
+      if controller.is_a? Class and controller < Scorched::Controller
+        controller.config[:auto_pass] = true
+      end
     end
 
+    ##
+    # Define named URI template for the controller
+    #
     def uri(name, template)
       template = URITemplate.new(template) unless template.is_a? URITemplate
       uri_templates << { name => template }

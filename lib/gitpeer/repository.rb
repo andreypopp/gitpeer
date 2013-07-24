@@ -6,10 +6,6 @@ module GitPeer
   class Repository < Controller
     include Controller::JSONRepresentation
 
-    # XXX: it doesn't make effect right now because of
-    # https://github.com/Wardrop/Scorched/issues/15
-    config[:strip_trailing_slash] = :ignore
-
     uri :repository,    '/'
     uri :branch,        '/branch/{id}'
     uri :tag,           '/tag/{id}'
@@ -22,7 +18,7 @@ module GitPeer
     uri :path_history,  '/history/{ref}{/path*}{?limit,after}'
 
     get :repository do
-      json Repository.new(name, description, default_branch)
+      json repository
     end
 
     get :contents do
@@ -30,11 +26,11 @@ module GitPeer
       ref_name = param :ref
 
       ref = or_404 { ref_by_name(ref_name) }
-      commit = or_404 { repo.lookup(ref.resolve.target) }
+      commit = or_404 { git.lookup(ref.resolve.target) }
 
       obj = if path
         entry = or_404 { commit.tree.path(path) }
-        repo.lookup(entry[:oid])
+        git.lookup(entry[:oid])
       else
         commit.tree
       end
@@ -58,7 +54,7 @@ module GitPeer
 
     [:branch, :tag, :commit, :tree, :blob, :object].each do |type|
       get type do
-        obj = or_404 { repo.lookup(param :id) }
+        obj = or_404 { git.lookup(param :id) }
         not_found unless type == :object or obj.type == type
         json obj
       end
@@ -153,20 +149,24 @@ module GitPeer
         nil
       end
 
-      def repo_name
+      def repo_path
         raise ArgumentError, 'unconfigured'
       end
 
-      def repo
+      def repository
+        Repository.new(name, description, default_branch)
+      end
+
+      def git 
         Rugged::Repository.new("#{repo_path}/.git")
       end
 
       def branch_by_name(name)
-        repo.ref("refs/heads/#{name}")
+        git.ref("refs/heads/#{name}")
       end
 
       def tag_by_name(name)
-        repo.ref("refs/tags/#{name}")
+        git.ref("refs/tags/#{name}")
       end
 
       def ref_by_name(name)
@@ -174,7 +174,7 @@ module GitPeer
       end
 
       def walk_from(from_id)
-        walker = Rugged::Walker.new(repo)
+        walker = Rugged::Walker.new(git)
         walker.sorting(Rugged::SORT_TOPO)
         walker.push(from_id)
         walker

@@ -69,6 +69,8 @@ class GitPeer::Controller < Scorched::Controller
 
   class << self
 
+    attr_accessor :parent
+
     def mounted(controller); end
 
     ##
@@ -88,9 +90,7 @@ class GitPeer::Controller < Scorched::Controller
         copy_over.each_pair do |n, v|
           instance_variable_set(n, v)
         end
-        options.each_pair do |k, v|
-          define_method k.to_sym do v end
-        end
+        config << options
         class_eval(&block) if block_given?
       end
     end
@@ -101,7 +101,8 @@ class GitPeer::Controller < Scorched::Controller
     def mount(prefix, controller)
       if controller.is_a? Class and controller < GitPeer::Controller
         controller.config[:auto_pass] = true
-        controller.mounted(self)
+        controller.mounted(self) if controller.respond_to? :mounted
+        controller.parent = self if controller.respond_to? :parent=
       end
       self << {pattern: prefix, target: controller}
     end

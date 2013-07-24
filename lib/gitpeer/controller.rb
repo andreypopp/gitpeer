@@ -11,9 +11,13 @@ class GitPeer::Controller < Scorched::Controller
   # Generate URI out of the template
   #
   def uri(name, **vars)
-    paths =  @breadcrumb[0..-1].map { |x| x[:path] }
-    template = uri_templates[name] or URITemplate.new(name)
-    url "#{paths.join}#{template.expand(vars)}"
+    template = if name.is_a? Symbol
+      construct_uri(name, **vars)
+    else
+      URITemplate.new(name).expand(vars)
+    end
+    raise ArgumentError, "unknown URI template #{name}" unless template
+    url template
   end
 
   ##
@@ -61,15 +65,10 @@ class GitPeer::Controller < Scorched::Controller
     halt 404
   end
 
-  def action
-    # we save current requests' breadcrumb in a variable
-    @breadcrumb = request.breadcrumb.clone
-    super()
-  end
-
   class << self
 
     attr_accessor :parent
+    attr_accessor :mounted_prefix
 
     def mounted(controller); end
 
@@ -103,6 +102,14 @@ class GitPeer::Controller < Scorched::Controller
         controller.config[:auto_pass] = true
         controller.mounted(self) if controller.respond_to? :mounted
         controller.parent = self if controller.respond_to? :parent=
+        controller.mounted_prefix = prefix if controller.respond_to? :mounted_prefix
+
+        if controller.respond_to? :uri_templates
+          controller.uri_templates.each_pair do |name, template|
+            template = URITemplate.new(prefix + template.pattern)
+            uri_templates[name] = template
+          end
+        end
       end
       self << {pattern: prefix, target: controller}
     end
@@ -113,6 +120,15 @@ class GitPeer::Controller < Scorched::Controller
     def uri(name, template)
       template = URITemplate.new(template) unless template.is_a? URITemplate
       uri_templates << { name => template }
+    end
+
+    def construct_uri(name, **vars)
+      template = uri_templates[name]
+      if template
+        "#{mounted_prefix || ''}#{template.expand(vars)}"
+      elsif parent
+        parent.construct_uri(name, **vars)
+      end
     end
 
     protected

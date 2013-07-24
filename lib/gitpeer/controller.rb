@@ -11,7 +11,7 @@ class GitPeer::Controller < Scorched::Controller
   # Generate URI out of the template
   #
   def uri(name, **vars)
-    paths =  request.breadcrumb[0..-2].map { |x| x[:path] }
+    paths =  @breadcrumb[0..-1].map { |x| x[:path] }
     template = uri_templates[name] or URITemplate.new(name)
     url "#{paths.join}#{template.expand(vars)}"
   end
@@ -35,7 +35,7 @@ class GitPeer::Controller < Scorched::Controller
   end
 
   ##
-  # Shortcut for getting a param out of captures which also can perform 
+  # Shortcut for getting a param out of captures which also can perform
   # validation and assign a default value
   #
   def param(name, type: nil, default: nil)
@@ -61,21 +61,33 @@ class GitPeer::Controller < Scorched::Controller
     halt 404
   end
 
+  def action
+    # we save current requests' breadcrumb in a variable
+    @breadcrumb = request.breadcrumb.clone
+    super()
+  end
+
   class << self
+
+    def mounted(controller); end
 
     ##
     # Configure controller with class methods or by passing a block
     #
     def configure(**options, &block)
-      # Save mappigns and filters so we can copy them onto configured controller
-      # instance
-      # TODO: maybe we should just dup entire class before?
-      p_mappings = @mappings
-      p_filters = @filters
+      # save class state over to configured subclass
+      copy_over = instance_variables.map do |n|
+        v = instance_variable_get(n)
+        # Scorched::Options and Scorched::Collection are "inheritable" so we
+        # may not bother copying them onto configured subclass
+        [n, v] unless v.is_a? Scorched::Options or v.is_a? Scorched::Collection
+      end
+      copy_over = Hash[copy_over.compact]
 
       Class::new(self) do
-        @mappings = p_mappings.clone if p_mappings
-        @filters = p_filters.clone if p_filters
+        copy_over.each_pair do |n, v|
+          instance_variable_set(n, v)
+        end
         options.each_pair do |k, v|
           define_method k.to_sym do v end
         end
@@ -87,10 +99,11 @@ class GitPeer::Controller < Scorched::Controller
     # Mount another controller under prefix
     #
     def mount(prefix, controller)
-      self << {pattern: prefix, target: controller}
-      if controller.is_a? Class and controller < Scorched::Controller
+      if controller.is_a? Class and controller < GitPeer::Controller
         controller.config[:auto_pass] = true
+        controller.mounted(self)
       end
+      self << {pattern: prefix, target: controller}
     end
 
     ##
@@ -101,7 +114,7 @@ class GitPeer::Controller < Scorched::Controller
       uri_templates << { name => template }
     end
 
-    private
+    protected
       def compile(pattern, match_to_end = false)
         pattern = uri_templates[pattern] || pattern
         if pattern.is_a? URITemplate then
@@ -110,5 +123,6 @@ class GitPeer::Controller < Scorched::Controller
           super(pattern, match_to_end)
         end
       end
+
   end
 end

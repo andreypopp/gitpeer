@@ -13,11 +13,9 @@ class App < GitPeer::Controller
   uri :tag,           '/tag/{id}'
   uri :object,        '/{id}'
 
-  @@api     = GitPeer::Repository.configure(repo_path: '.')
-  @@assets  = Rack::Directory.new('ui/assets')
 
-  mount '/api', @@api
-  mount '/a',   @@assets
+  mount '/api', GitPeer::Repository.configure(repo_path: '.')
+  mount '/a',   Rack::Directory.new('ui/assets')
 end
 
 run App

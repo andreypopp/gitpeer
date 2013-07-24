@@ -61,27 +61,33 @@ module GitPeer::Controller::JSONRepresentation
       @representations
     end
 
-    def register_representation(cls, representation = nil, name: nil, &block)
+    def register_representation(cls, representation = nil, name: nil, override: false, &block)
       unless representation or block_given?
         raise ArgumentError, 'provide a representation'
       end
       unless representation
         representation = Class::new(Representation, &block)
       end
-      representations.register(representation, cls, name: name)
+      representations.register(representation, cls, name: name, override: override)
     end
 
-  end
-
-  def representation_for(cls, name: nil, raise_on_missing: true)
-    now = self.class
-    while now do
-      continue unless now.respond_to? :representations
-      representation = now.representations.query(cls, name: name)
-      return representation if representation
-      now = now.superclass
+    def extend_representation_for(cls, name: nil, &block)
+      representation = representation_for(cls, name: name)
+      raise ArgumentError, "representation for #{cls} not found" unless representation
+      register_representation(cls, Class::new(representation, &block), name: name, override: true)
     end
-    raise GitPeer::Registry::LookupError, cls if raise_on_missing
+
+    def representation_for(cls, name: nil, raise_on_missing: true)
+      now = self
+      while now do
+        continue unless now.respond_to? :representations
+        representation = now.representations.query(cls, name: name)
+        return representation if representation
+        now = now.superclass
+      end
+      raise GitPeer::Registry::LookupError, cls if raise_on_missing
+    end
+
   end
 
   def json(obj, with: nil)

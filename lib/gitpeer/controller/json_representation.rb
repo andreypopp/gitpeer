@@ -1,14 +1,14 @@
 require 'json'
 require 'roar/decorator'
 require 'roar/representer/json'
-require 'roar/representer/feature/hypermedia'
+require 'roar/representer/json/hal'
 require 'gitpeer/registry'
 
 module GitPeer::Controller::JSONRepresentation
 
   class Representation < Roar::Decorator
     include Roar::Representer::JSON
-    include Roar::Representer::Feature::Hypermedia
+    include Roar::Representer::JSON::HAL
 
     def to_hash(options={})
       @options = options

@@ -114,6 +114,15 @@ class GitPeer::Controller < Scorched::Controller
       self << {pattern: prefix, target: controller}
     end
 
+    def mount_rack(prefix, app)
+      adapter = lambda do |env|
+        env = env.dup
+        env['PATH_INFO'] = env['PATH_INFO'][prefix.length..-1]
+        app.call(env)
+      end
+      self << {pattern: prefix, target: adapter}
+    end
+
     ##
     # Define named URI template for the controller
     #

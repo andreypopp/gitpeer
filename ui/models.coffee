@@ -3,6 +3,9 @@ Record = require 'backbone.record'
 lazyProperty = require 'lazy-property'
 {resolve} = require 'kew'
 
+url = (url) ->
+  url.replace(/\/+/g, '/')
+
 Collection::fetched = ->
   this.fetch().then => resolve(this)
 
@@ -59,7 +62,7 @@ class exports.Tree extends Record
     _links: null
 
 class exports.Contents extends Record
-  url: -> "/api/contents/#{this.ref}/#{this.path}"
+  url: -> url "/api/contents/#{this.ref}/#{this.path}"
   @define
     path: null
     ref: null

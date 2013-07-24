@@ -26,28 +26,21 @@ end
 
 class App < GitPeer::Controller
   uri :page_root,          '/'
-  uri :page_contents,      '/contents/{ref}{/path*}'
+  uri :page_contents,      '/contents/{ref}{+path}'
   uri :page_history,       '/history/{ref}{?limit,after}'
-  uri :page_path_history,  '/history/{ref}{/path*}{?limit,after}'
+  uri :page_path_history,  '/history/{ref}{+path}{?limit,after}'
   uri :page_commit,        '/commit/{id}'
-  uri :page_tree,          '/tree/{id}'
   uri :page_blob,          '/blob/{id}'
 
   page = Rack::Page.new('ui/index.html')
   assets = Rack::File.new('ui/assets')
   git = GitPeer::Repository.configure(repo_path: '.')
 
-  git::TreeEntryRepresentation.class_eval do
-    link :contents_html do uri :page_contents end
-  end
-
   git.extend_representation_for Rugged::Commit do
     link :self_html do uri :page_commit, id: represented.oid end
-    link :tree_html do uri :page_tree, id: represented.tree_id end
-  end
-
-  git.extend_representation_for Rugged::Tree do
-    link :self_html do uri :page_tree, id: represented.oid end
+    link :contents_html do
+      uri :page_contents, ref: represented.tree_id
+    end
   end
 
   git.extend_representation_for Rugged::Blob do
@@ -56,7 +49,9 @@ class App < GitPeer::Controller
 
   git.extend_representation_for GitPeer::Repository::Contents do
     link :self_html do
-      uri :page_contents, ref: represented.ref
+      uri :page_contents,
+        ref: represented.ref,
+        path: represented.path
     end
   end
 

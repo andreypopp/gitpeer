@@ -13,30 +13,31 @@ module GitPeer
     uri :tree,          '/tree/{id}'
     uri :blob,          '/blob/{id}'
     uri :object,        '/{id}'
-    uri :contents,      '/contents/{ref}{/path*}'
+    uri :contents,      '/contents/{ref}{+path}'
     uri :history,       '/history/{ref}{?limit,after}'
-    uri :path_history,  '/history/{ref}{/path*}{?limit,after}'
+    uri :path_history,  '/history/{ref}/{+path}{?limit,after}'
 
     get :repository do
       json repository
     end
 
     get :contents do
-      path = param :path
+      path = param :path, default: ''
       ref_name = param :ref
 
       ref = or_404 { ref_by_name(ref_name) }
       commit = or_404 { git.lookup(ref.resolve.target) }
 
-      obj = if path
-        entry = or_404 { commit.tree.path(path) }
-        git.lookup(entry[:oid])
-      else
+      obj = if path == ''
         commit.tree
+      else
+        entry = or_404 { commit.tree.path(path[1..-1]) }
+        git.lookup(entry[:oid])
       end
 
       tree = obj.is_a?(Rugged::Tree) ? obj : nil
       blob = obj.is_a?(Rugged::Blob) ? obj : nil
+
       json Contents.new(path, ref_name, commit, blob, tree)
     end
 
@@ -121,6 +122,7 @@ module GitPeer
       property :tree_id
       link :self do uri :commit, id: represented.oid end
       link :tree do uri :tree, id: represented.tree_id end
+      link :contents do uri :contents, ref: represented.tree_id end
     end
 
     register_representation Rugged::Blob do

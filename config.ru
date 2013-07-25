@@ -1,6 +1,6 @@
 require 'scorched'
 require 'gitpeer'
-require 'gitpeer/repository'
+require 'gitpeer/api/repository'
 
 class Rack::Page < Rack::File
   def _call(env)
@@ -34,7 +34,7 @@ class App < GitPeer::Controller
 
   page = Rack::Page.new('ui/index.html')
   assets = Rack::File.new('ui/assets')
-  git = GitPeer::Repository.configure(repo_path: '.')
+  git = GitPeer::API::Repository.configure(repo_path: '.')
 
   git.extend_representation_for Rugged::Commit, name: :basic do
     link :self_html do uri :page_commit, id: represented.oid end
@@ -54,7 +54,7 @@ class App < GitPeer::Controller
     link :self_html do uri :page_blob, id: represented.oid end
   end
 
-  git.extend_representation_for GitPeer::Repository::Contents do
+  git.extend_representation_for GitPeer::API::Repository::Contents do
     link :self_html do
       uri :page_contents,
         ref: represented.ref,
@@ -67,7 +67,7 @@ class App < GitPeer::Controller
     end
   end
 
-  git.extend_representation_for GitPeer::Repository::History do
+  git.extend_representation_for GitPeer::API::Repository::History do
     link :self_html do
       uri :page_history,
         ref: represented.ref,
@@ -76,7 +76,7 @@ class App < GitPeer::Controller
     end
   end
 
-  git.extend_representation_for GitPeer::Repository::Repository do
+  git.extend_representation_for GitPeer::API::Repository::Repository do
     link :self_html do
       uri :page_root, ref: represented.default_branch
     end

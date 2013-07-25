@@ -2,9 +2,9 @@ require 'rugged'
 require 'gitpeer/controller'
 require 'gitpeer/controller/json_representation'
 
-module GitPeer
-  class Repository < Controller
-    include Controller::JSONRepresentation
+module GitPeer::API
+  class Repository < GitPeer::Controller
+    include GitPeer::Controller::JSONRepresentation
 
     uri :repository,    '/'
     uri :branch,        '/branch/{id}'

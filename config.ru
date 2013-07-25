@@ -53,6 +53,11 @@ class App < GitPeer::Controller
         ref: represented.ref,
         path: represented.path
     end
+    # XXX: It would be nice to have URITemplate#partial_expand instead
+    link :rel => :entry_html, :templated => true do
+      prefix = uri :page_contents, ref: represented.ref
+      "#{prefix}{+path}"
+    end
   end
 
   git.extend_representation_for GitPeer::Repository::History do

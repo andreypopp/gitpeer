@@ -99,6 +99,11 @@ module GitPeer
           ref: represented.ref,
           path: represented.path
       end
+      # XXX: It would be nice to have URITemplate#partial_expand instead
+      link :rel => :entry, :templated => true do
+        prefix = uri :contents, ref: represented.ref
+        "#{prefix}{+path}"
+      end
     end
 
     register_representation History do

@@ -23,7 +23,7 @@ class exports.Author extends Record
     time: Date
 
 class exports.Commit extends Record
-  url: -> url "/api/git/commit/#{this.id}"
+  url: -> url "/api/commit/#{this.id}"
 
   @define
     message: null,

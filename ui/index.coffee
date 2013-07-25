@@ -19,7 +19,7 @@ Date::sameDay = (o) ->
     and this.getMonth() == o.getMonth() \
     and this.getDate() == o.getDate()
 
-TreeContentsView = createComponent
+DirectoryContentsView = createComponent
   createEntryView: (entry) ->
     icon = switch entry.type
       when 'tree' then 'icon-folder-close-alt'
@@ -36,7 +36,7 @@ TreeContentsView = createComponent
 
   render: ->
     model = this.getModel()
-    `<div class="TreeContentsView">
+    `<div class="DirectoryContentsView">
       <ul>{model.tree.entries.map(this.createEntryView)}</ul>
      </div>`
 
@@ -48,19 +48,15 @@ BlobView = createComponent
      </div>`
 
 ContentsView = createComponent
-  viewFor: (model) ->
-    if model instanceof Tree
-      `<TreeContentsView model={this.getModel()} />`
-    else if model instanceof Blob
-      `<BlobView model={model} />`
-    else
-      null
-
   render: ->
     model = this.getModel()
+    contents = if model.tree?
+      `<DirectoryContentsView model={model} />`
+    else if model.blob?
+      `<BlobView model={model.blob} />`
     `<div class="ContentsView">
       <Breadcrumb model={model} />
-      {this.viewFor(model.tree || model.blob)}
+      {contents}
       <CommitStatus model={model.commit} />
      </div>`
 

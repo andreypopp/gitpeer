@@ -35,14 +35,17 @@ CommitView = createComponent
 
   render: ->
     model = this.getModel()
-    model.comments.fetch(reset: true)
+
     commitComments = new Filtered model.comments,
       filter: (m) -> not m.position?
     diffComments = new Filtered model.comments,
       filter: (m) -> m.position?
+
+    model.comments.fetch(reset: true) if this.props.showComments
+
     `<div class="CommitView">
       <CommitStatus model={model} />
-      <DiffView model={model.diff} onComment={this.onComment} comments={diffComments} />
+      {/*<DiffView model={model.diff} onComment={this.onComment} comments={diffComments} />*/}
       <CommentsView model={commitComments} />
       <CommentEditor autosize
         placeholder="comment on commit..."

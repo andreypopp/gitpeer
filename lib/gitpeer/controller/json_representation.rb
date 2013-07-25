@@ -22,8 +22,8 @@ module GitPeer::Controller::JSONRepresentation
     class << self
       def property(name, **options, &block)
         if options[:resolve] and not options[:extend]
-          options[:extend] = lambda do |o, **options|
-            options[:controller].representation_for(o.class)
+          options[:extend] = lambda do |o, **local_options|
+            local_options[:controller].representation_for(o.class, name: options[:name])
           end
         end
         super name, **options, &block
@@ -36,8 +36,8 @@ module GitPeer::Controller::JSONRepresentation
 
       def collection(name, **options, &block)
         if options[:resolve] and not options[:extend]
-          options[:extend] = lambda do |o, **options|
-            options[:controller].representation_for(o.class)
+          options[:extend] = lambda do |o, **local_options|
+            local_options[:controller].representation_for(o.class, name: options[:name])
           end
         end
         super name, **options, &block
@@ -80,7 +80,10 @@ module GitPeer::Controller::JSONRepresentation
     def representation_for(cls, name: nil, raise_on_missing: true)
       now = self
       while now do
-        continue unless now.respond_to? :representations
+        unless now.respond_to? :representations
+          now = now.superclass
+          next
+        end
         representation = now.representations.query(cls, name: name)
         return representation if representation
         now = now.superclass

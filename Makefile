@@ -3,7 +3,7 @@ PORT = 3000
 
 run:
 	@bundle exec rerun \
-		-p 'lib/*.{rb,ru}' \
+		-p '**/*.{rb,ru}' \
 		-- rackup -p $(PORT) --host $(HOST) -s thin
 
 shell:

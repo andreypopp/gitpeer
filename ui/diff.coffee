@@ -34,15 +34,16 @@ React = require 'react-tools/build/modules/react'
 
 HasComments =
   componentDidMount: ->
-    this.observe(this.props.comments)
+    this.observe(this.props.comments) if this.props.comments
 
 DiffView = createComponent
   mixins: [HasComments]
 
   render: ->
     patches = this.getModel().map (patch) =>
-      comments = new Filtered this.props.comments,
-        filter: (m) -> m.position?.patch == patch.delta.new_file.path
+      if this.props.comments
+        comments = new Filtered this.props.comments,
+          filter: (m) -> m.position?.patch == patch.delta.new_file.path
       PatchView(model: patch, onComment: this.props.onComment, comments: comments)
     `<div class="DiffView">{patches}</div>`
 
@@ -57,8 +58,9 @@ PatchView = createComponent
     model = this.getModel()
 
     hunks = model.hunks.map (hunk) =>
-      comments = new Filtered this.props.comments,
-        filter: (m) -> m.position?.hunk == hunk.header
+      if this.props.comments
+        comments = new Filtered this.props.comments,
+          filter: (m) -> m.position?.hunk == hunk.header
       HunkView(model: hunk, onComment: this.onComment, comments: comments)
 
     `<div class="PatchView">
@@ -166,24 +168,27 @@ LineView = createComponent
       #{this.props.selected and 'selected' or ''}
     """
 
-    comments = this.props.hunk.comments.filter (comment) =>
-      m = comment.position.lines[comment.position.lines.length - 1]
-      lineKey(this.getModel()) == m
+    commentsEnabled = this.props.hunk.comments?
 
-    commentsView = if comments.length > 0
-      CommentsView
-        model: comments
-        onMouseEnter: this.props.hunk.onCommentMouseEnter
-        onMouseLeave: this.props.hunk.onCommentMouseLeave
+    if commentsEnabled
+      comments = this.props.hunk.comments.filter (comment) =>
+        m = comment.position.lines[comment.position.lines.length - 1]
+        lineKey(this.getModel()) == m
 
-    editorView = if this.isCommentEditorShown()
-      CommentEditor
-        autosize: true
-        autofocus: true
-        value: this.props.hunk.comment
-        onComment: this.onComment
-        onUpdate: this.props.hunk.onCommentUpdate
-        onCancel: this.hideCommentEditor
+      commentsView = if comments.length > 0
+        CommentsView
+          model: comments
+          onMouseEnter: this.props.hunk.onCommentMouseEnter
+          onMouseLeave: this.props.hunk.onCommentMouseLeave
+
+      editorView = if this.isCommentEditorShown()
+        CommentEditor
+          autosize: true
+          autofocus: true
+          value: this.props.hunk.comment
+          onComment: this.onComment
+          onUpdate: this.props.hunk.onCommentUpdate
+          onCancel: this.hideCommentEditor
 
     lineComments = if commentsView or editorView
       `<div class="line-comments">{commentsView}{editorView}</div>`
@@ -198,7 +203,7 @@ LineView = createComponent
           </pre>
         </span>
         <div class="toolbar">
-          <a onClick={this.toggleCommentEditor}><i class="icon-pencil"></i></a>
+          {commentsEnabled && <a onClick={this.toggleCommentEditor}><i class="icon-pencil"></i></a>}
         </div>
       </div>
       {lineComments}

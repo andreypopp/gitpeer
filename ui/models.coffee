@@ -34,6 +34,7 @@ class exports.Commit extends Record
     _links: null
 
   @lazyProperty 'comments', ->
+    return undefined
     new exports.Comments([], url: url "/api/comments/#{this.id}")
 
 class exports.Blob extends Record

@@ -36,20 +36,20 @@ CommitView = createComponent
   render: ->
     model = this.getModel()
 
-    commitComments = new Filtered model.comments,
-      filter: (m) -> not m.position?
-    diffComments = new Filtered model.comments,
-      filter: (m) -> m.position?
-
-    model.comments.fetch(reset: true) if this.props.showComments
+    if this.props.comments
+      commitComments = new Filtered model.comments,
+        filter: (m) -> not m.position?
+      diffComments = new Filtered model.comments,
+        filter: (m) -> m.position?
+      model.comments.fetch(reset: true)
 
     `<div class="CommitView">
       <CommitStatus model={model} />
-      {/*<DiffView model={model.diff} onComment={this.onComment} comments={diffComments} />*/}
-      <CommentsView model={commitComments} />
-      <CommentEditor autosize
+      <DiffView model={model.diff} onComment={this.onComment} comments={diffComments} />
+      {this.props.comments && <CommentsView model={commitComments} />}
+      {this.props.comments && <CommentEditor autosize
         placeholder="comment on commit..."
-        onComment={this.onComment} />
+        onComment={this.onComment} />}
      </div>`
 
 module.exports = {CommitStatus, CommitView}

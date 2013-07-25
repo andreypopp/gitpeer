@@ -57,7 +57,7 @@ ContentsView = createComponent
     `<div class="ContentsView">
       <Breadcrumb model={model} />
       {contents}
-      <CommitStatus model={model.commit} />
+      <CommitStatus nomessage model={model.commit} />
      </div>`
 
 HistoryView = createComponent
@@ -91,7 +91,7 @@ HistoryView = createComponent
             <Timestamp value={commit.author.time} format="%Y/%m/%d" />
           </div>`
       date = commit.author.time
-      elements.push `<CommitStatus skipTime model={commit} />`
+      elements.push `<CommitStatus notime nomessage model={commit} />`
     `<div class="HistoryView">
       {this.$pager()}
       <div class="commits">{elements}</div>

@@ -11,20 +11,45 @@ Timestamp = require 'react-time'
 {DiffView} = require './diff.coffee'
 
 CommitStatus = createComponent
+
+  getInitialState: ->
+    showMessage: not this.props.nomessage?
+
+  onClick: ->
+    this.setState(showMessage: not this.state?.showMessage)
+
+  formatMessage: (commit) ->
+    [headline, message] = commit.message.split('\n\n')
+    if message
+      message = message
+        .split('\n')
+        .filter(Boolean)
+        .map (line) -> `<p>{line}</p>`
+    {headline, message}
+
   render: ->
     model = this.getModel()
-    time = unless this.props.skipTime
+    time = unless this.props.notime
       `<div class="time">
         authored <Timestamp value={model.author.time} relative />
        </div>`
+    {headline, message} = this.formatMessage(model)
 
-    `<div class="CommitStatus">
-      <div class="sha">{model.id.substring(0, 6)}</div>
-      <div class="message">
-        <a href={model._links.self_html.href}>{model.message}</a>
+    showMessage = message? and (
+        not this.props.nomessage? and
+        this.state?.showMessage or
+        this.state?.showMessage)
+
+    `<div onClick={this.onClick} class="CommitStatus">
+      <div class="head">
+        <div class="sha">{model.id.substring(0, 6)}</div>
+        <div class="headline">
+          <a href={model._links.self_html.href}>{headline}</a>
+        </div>
+        <div class="author">{model.author.name}</div>
+        {time}
       </div>
-      <div class="author">{model.author.name}</div>
-      {time}
+      {showMessage && <div class="message">{message}</div>}
      </div>`
 
 CommitView = createComponent

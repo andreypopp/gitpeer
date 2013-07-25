@@ -151,16 +151,26 @@ small()
     padding: 0
 
 .CommitStatus
+  user-select: none
   margin-bottom: 1em
   font-size: 80%
   padding: 7px
   clearfix()
-  .message, .author, .time, .sha
+
+  .head
+    clearfix()
+  .message
+    margin: 7px
+    font-size: 90%
+    color: darken(dkcolor, 40%)
+    p
+      margin-bottom: 0
+  .headline, .author, .time, .sha
     margin-right: 0.3em
   .sha
     monospace()
     color: dkcolor
-  .message, .sha
+  .headline, .sha
     float: left
   .author, .time
     font-size: 90%

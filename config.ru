@@ -70,6 +70,7 @@ class App < GitPeer::Controller
 
   get '/**' do
     page(
+      title: git.repository.name,
       stylesheets: [
         '/a/font-awesome/css/font-awesome.css',
         '/a/index.css',
@@ -78,8 +79,7 @@ class App < GitPeer::Controller
         '/a/jquery.js',
         '/a/jquery.autosize.js',
         '/a/index.js',
-      ],
-      title: 'Project')
+      ])
   end
 
 end

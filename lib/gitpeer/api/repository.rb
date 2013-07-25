@@ -182,7 +182,7 @@ module GitPeer::API
 
     protected
 
-      def repository
+      def self.repository
         name = File.basename File.absolute_path config[:repo_path]
         Repository.new(name, config[:description], config[:default_branch] || 'master')
       end

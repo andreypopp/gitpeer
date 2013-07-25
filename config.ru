@@ -1,28 +1,7 @@
 require 'scorched'
 require 'gitpeer'
 require 'gitpeer/api/repository'
-
-class Rack::Page < Rack::File
-  def _call(env)
-    unless ALLOWED_VERBS.include? env["REQUEST_METHOD"]
-      return fail(405, "Method Not Allowed")
-    end
-
-    @path = @root
-
-    available = begin
-      File.file?(@path) && File.readable?(@path)
-    rescue SystemCallError
-      false
-    end
-
-    if available
-      serving(env)
-    else
-      fail(404, "File not found: #{path_info}")
-    end
-  end
-end
+require 'gitpeer/page'
 
 class App < GitPeer::Controller
   uri :page_root,          '/'
@@ -32,7 +11,6 @@ class App < GitPeer::Controller
   uri :page_commit,        '/commit/{id}'
   uri :page_blob,          '/blob/{id}'
 
-  page = Rack::Page.new('ui/index.html')
   assets = Rack::File.new('ui/assets')
   git = GitPeer::API::Repository.configure(repo_path: '.')
 
@@ -90,7 +68,21 @@ class App < GitPeer::Controller
 
   mount       '/api',   git
   mount_rack  '/a',     assets
-  mount_rack            page
+
+  get '/**' do
+    page(
+      stylesheets: [
+        '/a/font-awesome/css/font-awesome.css',
+        '/a/index.css',
+      ],
+      scripts: [
+        '/a/jquery.js',
+        '/a/jquery.autosize.js',
+        '/a/index.js',
+      ],
+      title: 'Project')
+  end
+
 end
 
 run App

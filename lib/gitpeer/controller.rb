@@ -144,6 +144,23 @@ class GitPeer::Controller < Scorched::Controller
       end
     end
 
+    def page(title: 'Unnamed Page',
+             scripts: [],
+             stylesheets: [])
+      stylesheets = stylesheets
+        .map { |href| "<link rel='stylesheet' href='#{href}' />" }
+        .join
+      scripts = scripts
+        .map { |href| "<script src='#{href}'></script>" }
+        .join
+      "
+      <!doctype>
+      <title>#{title}</title>
+      #{stylesheets}
+      #{scripts}
+      ".strip
+    end
+
     protected
       def compile(pattern, match_to_end = false)
         pattern = uri_templates[pattern] || pattern

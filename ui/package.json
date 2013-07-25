@@ -13,7 +13,9 @@
     "underscore": "~1.5.0",
     "foundation": "~4.2.1-1",
     "lazy-property": "0.0.2",
-    "uri-template": "~0.4.1"
+    "uri-template": "~0.4.1",
+    "jqueryify": "~2.0.0",
+    "jquery.autosize": "git+https://github.com/andreypopp/autosize.git"
   },
   "devDependencies": {
     "coffee-script": "~1.6.3",

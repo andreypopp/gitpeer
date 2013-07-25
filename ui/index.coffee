@@ -3,6 +3,7 @@
 ###
 
 
+$ = require 'jqueryify'
 {resolve} = require 'kew'
 {Router, Model, Collection, history} = require 'backbone'
 React = require 'react-tools/build/modules/react'

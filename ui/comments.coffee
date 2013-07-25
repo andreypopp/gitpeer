@@ -2,6 +2,8 @@
   @jsx React.DOM
 ###
 
+$ = require 'jqueryify'
+require 'jquery-autosize'
 React = require 'react-tools/build/modules/react'
 {createComponent} = require './core.coffee'
 {Comment} = require './models.coffee'

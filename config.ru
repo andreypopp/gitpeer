@@ -72,11 +72,8 @@ class App < GitPeer::Controller
     page(
       title: git.repository.name,
       stylesheets: ['/a/index.css'],
-      scripts: [
-        '/a/jquery.js',
-        '/a/jquery.autosize.js',
-        '/a/index.js',
-      ])
+      scripts: ['/a/index.js']
+    )
   end
 
 end

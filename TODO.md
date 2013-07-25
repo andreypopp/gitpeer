@@ -17,7 +17,8 @@
   * [ ] BlobView: handle long lines
   * [ ] BlobView: line/line-range selection
   * [ ] BlobView: syntax highlighting
-  * [ ] CommitStatus: proper formatting of commits messages
+  * [x] CommitStatus: proper formatting of commits messages
+    * [ ] should we use monospace font for message?
   * [ ] CommitStatus: make clickable area larger
 
 # 0.2

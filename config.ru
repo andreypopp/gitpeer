@@ -1,7 +1,6 @@
 require 'scorched'
 require 'gitpeer'
 require 'gitpeer/api/repository'
-require 'gitpeer/page'
 
 class App < GitPeer::Controller
   uri :page_root,          '/'

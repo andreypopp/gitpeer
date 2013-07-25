@@ -91,7 +91,7 @@ module GitPeer
     register_representation Contents do
       property :path
       property :ref
-      property :commit, resolve: true
+      property :commit, resolve: true, name: :basic
       property :blob, resolve: true
       property :tree, resolve: true
       link :self do
@@ -110,7 +110,7 @@ module GitPeer
       property :ref
       property :limit
       property :after
-      collection :commits, resolve: true
+      collection :commits, resolve: true, name: :basic
       link :self do
         uri :history,
           ref: represented.ref,
@@ -119,7 +119,7 @@ module GitPeer
       end
     end
 
-    register_representation Rugged::Commit do
+    class BasicCommitRepresentation < Representation
       property :oid, as: :id
       property :message
       property :author
@@ -129,6 +129,13 @@ module GitPeer
       link :tree do uri :tree, id: represented.tree_id end
       link :contents do uri :contents, ref: represented.tree_id end
     end
+
+    class CommitRepresentation < BasicCommitRepresentation
+      collection :diff, getter: lambda { |o, *| diff(reverse: true).to_a }, resolve: true
+    end
+
+    register_representation Rugged::Commit, CommitRepresentation
+    register_representation Rugged::Commit, BasicCommitRepresentation, name: :basic
 
     register_representation Rugged::Blob do
       property :oid, as: :id
@@ -140,6 +147,37 @@ module GitPeer
       property :oid, as: :id
       collection :entries, decorator: TreeEntryRepresentation
       link :self do uri :tree, id: represented.oid end
+    end
+
+    register_representation Rugged::Diff::Patch do
+      property :delta, resolve: true
+      property :size
+      property :additions
+      property :deletions
+      property :deletions
+      collection :hunks, resolve: true
+    end
+
+    register_representation Rugged::Diff::Delta do
+      property :old_file
+      property :new_file
+      property :similarity
+      property :status
+      property :binary
+    end
+
+    register_representation Rugged::Diff::Hunk do
+      property :size
+      property :header
+      property :range
+      collection :lines, resolve: true
+    end
+
+    register_representation Rugged::Diff::Line do
+      property :line_origin
+      property :content
+      property :old_lineno
+      property :new_lineno
     end
 
     protected

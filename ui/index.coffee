@@ -7,6 +7,7 @@
 {Router, Model, Collection, history} = require 'backbone'
 React = require 'react-tools/build/modules/react'
 Timestamp = require 'react-time'
+uriTemplate = require 'uri-template'
 
 {renderComponent, createComponent} = require './core.coffee'
 {History, Comment, Contents, Commit, Tree, Blob} = require './models.coffee'
@@ -18,21 +19,25 @@ Date::sameDay = (o) ->
     and this.getMonth() == o.getMonth() \
     and this.getDate() == o.getDate()
 
-TreeView = createComponent
+TreeContentsView = createComponent
   createEntryView: (entry) ->
     icon = switch entry.type
       when 'tree' then 'icon-folder-close-alt'
       else 'icon-file-alt'
     `<li class="TreeEntry">
-      <a href={entry._links.contents_html.href}>
+      <a href={this.entryURI(entry)}>
         <i class={icon}></i>{entry.name}
       </a>
      </li>`
 
+  entryURI: (entry) ->
+    uriTemplate.parse(this.getModel()._links.entry_contents_html.href)
+      .expand(path: entry.name)
+
   render: ->
-    tree = this.getModel()
-    `<div class="TreeView">
-      <ul>{tree.entries.map(this.createEntryView)}</ul>
+    model = this.getModel()
+    `<div class="TreeContentsView">
+      <ul>{model.tree.entries.map(this.createEntryView)}</ul>
      </div>`
 
 BlobView = createComponent
@@ -45,7 +50,7 @@ BlobView = createComponent
 ContentsView = createComponent
   viewFor: (model) ->
     if model instanceof Tree
-      `<TreeView model={model} />`
+      `<TreeContentsView model={this.getModel()} />`
     else if model instanceof Blob
       `<BlobView model={model} />`
     else

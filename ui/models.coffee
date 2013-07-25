@@ -69,6 +69,7 @@ class exports.Contents extends Record
     commit: exports.Commit
     tree: exports.Tree
     blob: exports.Blob
+    _links: null
 
 class exports.Commits extends Collection
   model: exports.Commit

@@ -12,7 +12,8 @@
     "kew": "~0.1.7",
     "underscore": "~1.5.0",
     "foundation": "~4.2.1-1",
-    "lazy-property": "0.0.2"
+    "lazy-property": "0.0.2",
+    "uri-template": "~0.4.1"
   },
   "devDependencies": {
     "coffee-script": "~1.6.3",

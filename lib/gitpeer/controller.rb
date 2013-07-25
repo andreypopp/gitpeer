@@ -17,7 +17,7 @@ class GitPeer::Controller < Scorched::Controller
       URITemplate.new(name).expand(vars)
     end
     raise ArgumentError, "unknown URI template #{name}" unless template
-    url template
+    template
   end
 
   ##

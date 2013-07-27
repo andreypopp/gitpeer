@@ -14,7 +14,13 @@ class App < GitPeer::Controller
   uri :page_blob,          '/blob/{id}'
 
   assets = Rack::File.new('ui/assets')
-  auth = GitPeer::Auth
+
+  auth = GitPeer::Auth.configure do
+    provider :github,
+      '0db74a96913fc2b5fb54',
+      'fd0a74f0b3fa2f2722b8ba0dae191dcb29be8c7b'
+  end
+
   git = GitPeer::API::Repository.configure(repo_path: '.') do
 
     extend_representation_for Rugged::Commit, name: :basic do
@@ -84,9 +90,4 @@ class App < GitPeer::Controller
 end
 
 use Rack::Session::Cookie
-use OmniAuth::Builder do
-  provider :github,
-    '0db74a96913fc2b5fb54',
-    'fd0a74f0b3fa2f2722b8ba0dae191dcb29be8c7b'
-end
 run App

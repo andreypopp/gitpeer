@@ -34,4 +34,13 @@ class GitPeer::Auth < GitPeer::Controller
   def key
     config[:key] or 'user'
   end
+
+  def self.provider(klass, *args, &block)
+    middleware << proc do
+      use OmniAuth::Builder do
+        provider klass, *args, &block
+      end
+    end
+  end
+
 end

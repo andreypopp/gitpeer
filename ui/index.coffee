@@ -13,6 +13,7 @@ uriTemplate = require 'uri-template'
 {renderComponent, createComponent} = require './core.coffee'
 {History, Comment, Contents, Commit, Tree, Blob} = require './models.coffee'
 {CommitStatus, CommitView} = require './commit.coffee'
+Auth = require './auth.coffee'
 
 Date::sameDay = (o) ->
   return false unless o?
@@ -183,11 +184,11 @@ App = createComponent
           <a href="/history">history</a>
         </div>
       </header>
-      <Auth user={this.props.user} />
+      <AuthStatus user={this.props.user} />
       {this.viewFor(model)}
      </div>`
 
-Auth = createComponent
+AuthStatus = createComponent
   signIn: ->
     window.open('/auth/github')
 
@@ -196,7 +197,7 @@ Auth = createComponent
 
   render: ->
     if this.props.user
-      `<div class="Auth">
+      `<div class="AuthStatus">
         <div class="meta">
           {this.props.user.name}
           <a class="signout" onClick={this.signOut}> (signout)</a>
@@ -204,40 +205,18 @@ Auth = createComponent
         </div>
       </div>`
     else
-      `<div class="Auth">
+      `<div class="AuthStatus">
         <div class="meta">
           <a class="signin" onClick={this.signIn}>sign in with GitHub</a>
         </div>
        </div>`
 
-class AuthData
-  key: 'gitman.user'
-
-  constructor: (onchange) ->
-    this.onchange = onchange
-    this.user = this.getUser()
-    window.addEventListener 'storage', ({key, newValue}) =>
-      if key == 'gitman.user'
-        this.user = this.getUser()
-        this.onchange(this.user)
-
-  getUser: ->
-    try
-      JSON.parse(window.localStorage.getItem(this.key))
-    catch
-      null
-
-  setUser: (user) ->
-    # TODO: this should drop session as well
-    window.localStorage.setItem(this.key, user)
-    this.user = user
-
-  signOut: ->
-    this.setUser(null)
-    this.onchange(this.user)
-
 window.onload = ->
   GitMan = window.GitMan = {}
-  GitMan.authData = new AuthData (user) -> GitMan.app.setProps(user: user)
-  GitMan.app = renderComponent(App(user: GitMan.authData.user), document.body)
+  GitMan.Auth = Auth
+  GitMan.app = renderComponent(App(user: GitMan.Auth.user()), document.body)
+
+  GitMan.Auth.on 'user', (user) ->
+    GitMan.app.setProps {user}
+
   history.start(pushState: true)

@@ -1,19 +1,22 @@
 ###*
+
+  Comment editor
+
   @jsx React.DOM
+
 ###
 
+React = require 'react-tools/build/modules/react'
 $ = require 'jqueryify'
 require 'jquery-autosize'
-React = require 'react-tools/build/modules/react'
-{createComponent} = require './core.coffee'
-{Comment} = require './models.coffee'
-Timestamp = require 'react-time'
 
-CommentEditor = createComponent
+{createComponent} = require './core.coffee'
+
+module.exports = createComponent
 
   onSubmit: ->
     comment = new Comment
-      author: GitMan.user
+      author: GitMan.user # TODO: get rid of global state
       content: this.refs.comment.getDOMNode().value
       created: new Date
     this.props.onComment?(comment)
@@ -45,36 +48,3 @@ CommentEditor = createComponent
         <i class="icon-remove"></i> cancel
       </button>
      </div>`
-
-CommentsView = createComponent
-
-  render: ->
-    model = this.getModel()
-    comments = model.map (comment) =>
-      CommentView
-        model: comment
-        onMouseEnter: this.props.onMouseEnter
-        onMouseLeave: this.props.onMouseLeave
-    `<div class="CommentsView">{comments}</div>`
-
-CommentView = createComponent
-
-  onMouseEnter: ->
-    this.props.onMouseEnter?(this.getModel(), this)
-
-  onMouseLeave: ->
-    this.props.onMouseLeave?(this.getModel(), this)
-
-  render: ->
-    model = this.getModel()
-    `<div class="CommentView"
-        onMouseEnter={this.onMouseEnter}
-        onMouseLeave={this.onMouseLeave}>
-      <div class="content">{model.content}</div>
-      <div class="meta">
-        <span class="author">{model.author.name}</span>
-        <Timestamp value={model.created} relative />
-      </div>
-     </div>`
-
-module.exports = {CommentEditor, CommentsView, CommentView}

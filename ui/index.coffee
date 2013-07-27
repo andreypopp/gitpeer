@@ -7,123 +7,13 @@ $ = require 'jqueryify'
 {resolve} = require 'kew'
 {Router, Model, Collection, history} = require 'backbone'
 React = require 'react-tools/build/modules/react'
-Timestamp = require 'react-time'
-uriTemplate = require 'uri-template'
 
-{renderComponent, createComponent} = require './core.coffee'
+{renderComponent, createComponent} = require './components/core.coffee'
 {History, Comment, Contents, Commit, Tree, Blob} = require './models.coffee'
-{CommitStatus, CommitView} = require './commit.coffee'
+CommitView = require './components/commit_view.coffee'
+ContentsView = require './components/contents_view.coffee'
+HistoryView = require './components/history_view.coffee'
 Auth = require './auth.coffee'
-
-Date::sameDay = (o) ->
-  return false unless o?
-  this.getYear() == o.getYear() \
-    and this.getMonth() == o.getMonth() \
-    and this.getDate() == o.getDate()
-
-DirectoryContentsView = createComponent
-  createEntryView: (entry) ->
-    icon = switch entry.type
-      when 'tree' then 'icon-folder-close-alt'
-      else 'icon-file-alt'
-    `<li class="TreeEntry">
-      <a href={this.entryURI(entry)}>
-        <i class={icon}></i>{entry.name}
-      </a>
-     </li>`
-
-  entryURI: (entry) ->
-    uriTemplate.parse(this.getModel()._links.entry_contents_html.href)
-      .expand(path: entry.name)
-
-  render: ->
-    model = this.getModel()
-    `<div class="DirectoryContentsView">
-      <ul>{model.tree.entries.map(this.createEntryView)}</ul>
-     </div>`
-
-BlobView = createComponent
-  render: ->
-    blob = this.getModel()
-    `<div class="BlobView">
-      <pre><code>{blob.content}</code></pre>
-     </div>`
-
-ContentsView = createComponent
-  render: ->
-    model = this.getModel()
-    contents = if model.tree?
-      `<DirectoryContentsView model={model} />`
-    else if model.blob?
-      `<BlobView model={model.blob} />`
-    `<div class="ContentsView">
-      <Breadcrumb model={model} />
-      {contents}
-      <CommitStatus nomessage model={model.commit} />
-     </div>`
-
-HistoryView = createComponent
-
-  next: ->
-    this.getModel().fetchNext()
-
-  prev: ->
-    this.getModel().fetchPrev()
-
-  $pager: ->
-    model = this.getModel()
-    if model.pagination?
-      next = if model.pagination.next
-        `<a class="next" href={model.urlNext()}>
-          <i class="icon-long-arrow-down"></i> older
-         </a>`
-      prev = if model.pagination.prev
-        `<a class="prev" href={model.urlPrev()}>
-          <i class="icon-long-arrow-up"></i> newer
-         </a>`
-      `<div class="pager">{next}{prev}</div>`
-
-  render: ->
-    model = this.getModel()
-    date = undefined
-    elements = []
-    commits = for commit in model.commits.models
-      unless commit.author.time.sameDay(date)
-        elements.push `<div class="date">
-            <Timestamp value={commit.author.time} format="%Y/%m/%d" />
-          </div>`
-      date = commit.author.time
-      elements.push `<CommitStatus notime nomessage model={commit} />`
-    `<div class="HistoryView">
-      {this.$pager()}
-      <div class="commits">{elements}</div>
-      {this.$pager()}
-     </div>`
-
-Breadcrumb = createComponent
-
-  render: ->
-    model = this.getModel()
-    parts = if model?.path?
-      model.path.split('/').filter(Boolean)
-    else
-      []
-
-    elems = parts.reduce ((s, cur) ->
-      s = s.slice(0)
-      prev = s[s.length - 1]
-      link = "#{prev.link}/#{cur}"
-      s.push
-        link: link
-        el: `<li><a href={link}>{cur}</a></li>`
-      s
-    ), [{el: `<li><a href="/">/</a></li>`, link: '/contents/master'}]
-
-    elems = elems.map (e) -> e.el
-
-    `<ul class="Breadcrumb">
-      {elems}
-     </ul>`
 
 App = createComponent
 

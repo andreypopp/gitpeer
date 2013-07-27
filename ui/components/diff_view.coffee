@@ -23,20 +23,22 @@
   - LineSelection - tracking hunk's selection state
 
   @jsx React.DOM
+
 ###
 
 React = require 'react-tools/build/modules/react'
+{Filtered} = require 'backbone.projections/filtered'
 {contains} = require 'underscore'
 
 {createComponent} = require './core.coffee'
-{CommentEditor, CommentsView} = require './comments.coffee'
-{Filtered} = require 'backbone.projections/filtered'
+CommentEditor = require './comment_editor.coffee'
+CommentsView = require './comments_view.coffee'
 
 HasComments =
   componentDidMount: ->
     this.observe(this.props.comments) if this.props.comments
 
-DiffView = createComponent
+module.exports = createComponent
   mixins: [HasComments]
 
   render: ->
@@ -268,5 +270,3 @@ class LineSelection
 
 lineKey = (line) ->
   "#{line.old_lineno}-#{line.new_lineno}"
-
-module.exports = {DiffView, PatchView}

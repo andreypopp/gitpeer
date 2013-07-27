@@ -110,11 +110,15 @@ class GitPeer::Controller < Scorched::Controller
             uri_templates[name] = template
           end
         end
+
+        self << {pattern: prefix, target: controller}
+      else
+        mount_rack prefix, controller
       end
-      self << {pattern: prefix, target: controller}
     end
 
     def mount_rack(prefix, app = nil)
+      prefix = prefix + "/" unless prefix.end_with? '/'
       unless app
         app = prefix
         prefix = nil

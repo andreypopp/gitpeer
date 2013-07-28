@@ -72,7 +72,7 @@ module GitPeer::API
       link :self do uri represented[:type], id: represented[:oid] end
     end
 
-    register_representation Repository do
+    representation Repository do
       property :name
       property :description
       property :default_branch
@@ -88,7 +88,7 @@ module GitPeer::API
       end
     end
 
-    register_representation Contents do
+    representation Contents do
       property :path
       property :ref
       property :commit, resolve: true, name: :basic
@@ -106,7 +106,7 @@ module GitPeer::API
       end
     end
 
-    register_representation History do
+    representation History do
       property :ref
       property :limit
       property :after
@@ -134,22 +134,22 @@ module GitPeer::API
       collection :diff, getter: lambda { |o, *| diff(reverse: true).to_a }, resolve: true
     end
 
-    register_representation Rugged::Commit, CommitRepresentation
-    register_representation Rugged::Commit, BasicCommitRepresentation, name: :basic
+    representation Rugged::Commit, CommitRepresentation
+    representation Rugged::Commit, BasicCommitRepresentation, name: :basic
 
-    register_representation Rugged::Blob do
+    representation Rugged::Blob do
       property :oid, as: :id
       property :content
       link :self do uri :blob, id: represented.oid end
     end
 
-    register_representation Rugged::Tree do
+    representation Rugged::Tree do
       property :oid, as: :id
       collection :entries, decorator: TreeEntryRepresentation
       link :self do uri :tree, id: represented.oid end
     end
 
-    register_representation Rugged::Diff::Patch do
+    representation Rugged::Diff::Patch do
       property :delta, resolve: true
       property :size
       property :additions
@@ -158,7 +158,7 @@ module GitPeer::API
       collection :hunks, resolve: true
     end
 
-    register_representation Rugged::Diff::Delta do
+    representation Rugged::Diff::Delta do
       property :old_file
       property :new_file
       property :similarity
@@ -166,14 +166,14 @@ module GitPeer::API
       property :binary
     end
 
-    register_representation Rugged::Diff::Hunk do
+    representation Rugged::Diff::Hunk do
       property :size
       property :header
       property :range
       collection :lines, resolve: true
     end
 
-    register_representation Rugged::Diff::Line do
+    representation Rugged::Diff::Line do
       property :line_origin
       property :content
       property :old_lineno

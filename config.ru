@@ -23,25 +23,25 @@ class App < GitPeer::Controller
 
   git = GitPeer::API::Repository.configure(repo_path: '.') do
 
-    extend_representation_for Rugged::Commit, name: :basic do
+    extend_representation Rugged::Commit, name: :basic do
       link :self_html do uri :page_commit, id: represented.oid end
       link :contents_html do
         uri :page_contents, ref: represented.tree_id
       end
     end
 
-    extend_representation_for Rugged::Commit do
+    extend_representation Rugged::Commit do
       link :self_html do uri :page_commit, id: represented.oid end
       link :contents_html do
         uri :page_contents, ref: represented.tree_id
       end
     end
 
-    extend_representation_for Rugged::Blob do
+    extend_representation Rugged::Blob do
       link :self_html do uri :page_blob, id: represented.oid end
     end
 
-    extend_representation_for GitPeer::API::Repository::Contents do
+    extend_representation GitPeer::API::Repository::Contents do
       link :self_html do
         uri :page_contents,
           ref: represented.ref,
@@ -54,7 +54,7 @@ class App < GitPeer::Controller
       end
     end
 
-    extend_representation_for GitPeer::API::Repository::History do
+    extend_representation GitPeer::API::Repository::History do
       link :self_html do
         uri :page_history,
           ref: represented.ref,
@@ -63,7 +63,7 @@ class App < GitPeer::Controller
       end
     end
 
-    extend_representation_for GitPeer::API::Repository::Repository do
+    extend_representation GitPeer::API::Repository::Repository do
       link :self_html do
         uri :page_root, ref: represented.default_branch
       end

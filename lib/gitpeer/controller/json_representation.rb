@@ -23,7 +23,7 @@ module GitPeer::Controller::JSONRepresentation
       def property(name, **options, &block)
         if options[:resolve] and not options[:extend]
           options[:extend] = lambda do |o, **local_options|
-            local_options[:controller].representation_for(o.class, name: options[:name])
+            local_options[:controller].representation(o.class, name: options[:name])
           end
         end
         super name, **options, &block
@@ -37,7 +37,7 @@ module GitPeer::Controller::JSONRepresentation
       def collection(name, **options, &block)
         if options[:resolve] and not options[:extend]
           options[:extend] = lambda do |o, **local_options|
-            local_options[:controller].representation_for(o.class, name: options[:name])
+            local_options[:controller].representation(o.class, name: options[:name])
           end
         end
         super name, **options, &block
@@ -71,13 +71,7 @@ module GitPeer::Controller::JSONRepresentation
       representations.register(representation, cls, name: name, override: override)
     end
 
-    def extend_representation_for(cls, name: nil, &block)
-      representation = representation_for(cls, name: name)
-      raise ArgumentError, "representation for #{cls} not found" unless representation
-      register_representation(cls, Class::new(representation, &block), name: name, override: true)
-    end
-
-    def representation_for(cls, name: nil, raise_on_missing: true)
+    def get_representation(cls, name: nil, raise_on_missing: true)
       now = self
       while now do
         unless now.respond_to? :representations
@@ -91,11 +85,25 @@ module GitPeer::Controller::JSONRepresentation
       raise GitPeer::Registry::LookupError, cls if raise_on_missing
     end
 
+    def extend_representation(cls, name: nil, &block)
+      representation = representation(cls, name: name)
+      raise ArgumentError, "representation for #{cls} not found" unless representation
+      register_representation(cls, Class::new(representation, &block), name: name, override: true)
+    end
+
+    def representation(cls, representation = nil, name: nil, &block)
+      if block_given? or representation
+        register_representation(cls, representation, name: name, &block)
+      else
+        get_representation(cls, name: name)
+      end
+    end
+
   end
 
   def json(obj, with: nil)
     response['Content-Type'] = 'application/json'
-    with = representation_for(obj.class, raise_on_missing: false) unless with
+    with = get_representation(obj.class, raise_on_missing: false) unless with
     if with
       with.new(obj).to_json(controller: self)
     else

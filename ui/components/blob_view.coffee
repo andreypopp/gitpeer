@@ -9,7 +9,7 @@
 React = require 'react-tools/build/modules/react'
 {createComponent} = require './core.coffee'
 
-BlobView = createComponent
+module.exports = createComponent
   render: ->
     blob = this.getModel()
     `<div class="BlobView">

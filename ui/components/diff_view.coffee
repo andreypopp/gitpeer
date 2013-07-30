@@ -132,7 +132,7 @@ HunkView = createComponent
           selected: this.selection.contains(idx)
 
     `<div class="HunkView">
-      <div class="header">{hunk.header}</div>
+      <div class="header"><pre>{hunk.header}</pre></div>
       <div class="lines">{lines}</div>
      </div>`
 

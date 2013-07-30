@@ -11,14 +11,18 @@
   * [ ] ContentsView: link not to the latest commit but to the commit which was
         latest for current path or its children
   * [ ] ContentsView: readme support
-  * [ ] DiffView: handle long lines
+  * [x] DiffView: handle long lines
   * [ ] DiffView: store and handle selection state in URI
   * [ ] DiffView: simplify or get rid of LineSelection controller
-  * [ ] BlobView: handle long lines
+  * [x] BlobView: handle long lines
   * [ ] BlobView: line/line-range selection
   * [ ] BlobView: syntax highlighting
   * [x] CommitStatus: proper formatting of commits messages
     * [ ] should we use monospace font for message?
   * [ ] CommitStatus: make clickable area larger
 
-# 0.2
+# future releases
+
+  * [ ] issues
+  * [ ] wiki
+  * [ ] code editor

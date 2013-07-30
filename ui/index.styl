@@ -123,7 +123,10 @@ small()
   background: hlcolor
   color: color
   padding: 1em
+  overflow-y: hidden
+  overflow-x: scroll
   pre
+    display: table
     line-height: 1.3em
 
 .Breadcrumb
@@ -245,9 +248,13 @@ small()
     color: dkcolor
 
 .HunkView
+  overflow-y: hidden
+  overflow-x: scroll
   .lines
     position: relative
-  .header
+    display: table
+    min-width: 100%
+  .header pre
     monospace()
     font-size: 80%
     font-weight: normal

@@ -1,5 +1,8 @@
 # 0.1
 
+  * [ ] organize navigation around site
+        currently it is done through a[href] but that cannot (?) be catched
+        reliable via React
   * [ ] generate models from representations?
   * [ ] tooltips?
   * [ ] component registries per app, not per controller

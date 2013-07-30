@@ -2,6 +2,7 @@
 
   * [ ] generate models from representations?
   * [ ] tooltips?
+  * [ ] component registries per app, not per controller
   * [x] refactor UI components into reusable pieces
   * [ ] refactor styles into more reusable pieces
   * [ ] make new button styles

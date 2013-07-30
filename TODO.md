@@ -19,7 +19,7 @@
   * [ ] BlobView: syntax highlighting
   * [x] CommitStatus: proper formatting of commits messages
     * [ ] should we use monospace font for message?
-  * [ ] CommitStatus: make clickable area larger
+  * [x] CommitStatus: make clickable area larger
 
 # future releases
 

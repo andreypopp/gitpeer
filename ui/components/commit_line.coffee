@@ -24,9 +24,6 @@ module.exports = createComponent
   getInitialState: ->
     showMessage: not this.props.nomessage?
 
-  onClick: ->
-    this.setState(showMessage: not this.state?.showMessage)
-
   render: ->
     model = this.getModel()
 
@@ -36,17 +33,15 @@ module.exports = createComponent
         this.state?.showMessage or
         this.state?.showMessage)
 
-    `<div onClick={this.onClick} class="CommitLine">
+    `<a href={model._links.self_html.href} class="CommitLine">
       <div class="head">
         <div class="sha">{model.id.substring(0, 6)}</div>
-        <div class="headline">
-          <a href={model._links.self_html.href}>{headline}</a>
-        </div>
+        <div class="headline">{headline}</div>
         <div class="author">{model.author.name}</div>
-        {!this.props.notime && 
+        {!this.props.notime &&
           <div class="time">
             authored <Timestamp value={model.author.time} relative />
           </div>}
       </div>
       {showMessage && <div class="message">{message}</div>}
-     </div>`
+     </a>`

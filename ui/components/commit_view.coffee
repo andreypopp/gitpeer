@@ -9,11 +9,11 @@
 React = require 'react-tools/build/modules/react'
 {Filtered} = require 'backbone.projections/filtered'
 
-{createComponent} = require './core.coffee'
-DiffView = require './diff_view.coffee'
-CommitLine = require './commit_line.coffee'
-CommentEditor = require './comment_editor.coffee'
-CommentsView = require './comments_view.coffee'
+{createComponent} = require './core'
+DiffView = require './diff_view'
+CommitLine = require './commit_line'
+CommentEditor = require './comment_editor'
+CommentsView = require './comments_view'
 
 module.exports = createComponent
 

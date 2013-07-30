@@ -30,9 +30,9 @@ React = require 'react-tools/build/modules/react'
 {Filtered} = require 'backbone.projections/filtered'
 {contains} = require 'underscore'
 
-{createComponent} = require './core.coffee'
-CommentEditor = require './comment_editor.coffee'
-CommentsView = require './comments_view.coffee'
+{createComponent} = require './core'
+CommentEditor = require './comment_editor'
+CommentsView = require './comments_view'
 
 HasComments =
   componentDidMount: ->

@@ -10,10 +10,9 @@ React = require 'react-tools/build/modules/react'
 Timestamp = require 'react-time'
 uriTemplate = require 'uri-template'
 
-BlobView = require './blob_view.coffee'
-CommitLine = require './commit_line.coffee'
-
-{createComponent} = require './core.coffee'
+BlobView = require './blob_view'
+CommitLine = require './commit_line'
+{createComponent} = require './core'
 
 DirectoryContentsView = createComponent
 

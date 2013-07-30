@@ -8,12 +8,12 @@ $ = require 'jqueryify'
 {Router, Model, Collection, history} = require 'backbone'
 React = require 'react-tools/build/modules/react'
 
-{renderComponent, createComponent} = require './components/core.coffee'
-{History, Comment, Contents, Commit, Tree, Blob} = require './models.coffee'
-CommitView = require './components/commit_view.coffee'
-ContentsView = require './components/contents_view.coffee'
-HistoryView = require './components/history_view.coffee'
-Auth = require './auth.coffee'
+{renderComponent, createComponent} = require './components/core'
+{History, Comment, Contents, Commit, Tree, Blob} = require './models'
+CommitView = require './components/commit_view'
+ContentsView = require './components/contents_view'
+HistoryView = require './components/history_view'
+Auth = require './auth'
 
 App = createComponent
 

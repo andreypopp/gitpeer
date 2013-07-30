@@ -9,8 +9,8 @@
 React = require 'react-tools/build/modules/react'
 Timestamp = require 'react-time'
 
-{createComponent} = require './core.coffee'
-{Comment} = require '../models.coffee'
+{createComponent} = require './core'
+{Comment} = require '../models'
 
 CommentView = createComponent
 

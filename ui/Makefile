@@ -5,7 +5,7 @@ REPO = $(shell cat .git/config | grep url | xargs echo | sed -E 's/^url = //g')
 REPONAME = $(shell echo $(REPO) | sed -E 's_.+:([a-zA-Z0-9_\-]+)/([a-zA-Z0-9_\-]+)\.git_\1/\2_')
 STYLUS_OPTS = --include ./node_modules/normalize/lib \
 							--use nib --use foundation
-BROWSERIFY_OPTS = --debug -t coffeeify -t reactify -o assets/index.js
+BROWSERIFY_OPTS = --debug -t coffeeify -t reactify --extension '.coffee' -o assets/index.js
 
 watch:
 	$(MAKE) -j2 watch-js watch-css

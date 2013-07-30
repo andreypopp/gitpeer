@@ -8,7 +8,7 @@
 
 React = require 'react-tools/build/modules/react'
 Timestamp = require 'react-time'
-{createComponent} = require './core.coffee'
+{createComponent} = require './core'
 
 formatMessage = (message) ->
   [headline, message] = message.split('\n\n')

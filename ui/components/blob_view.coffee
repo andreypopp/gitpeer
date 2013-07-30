@@ -7,7 +7,7 @@
 ###
 
 React = require 'react-tools/build/modules/react'
-{createComponent} = require './core.coffee'
+{createComponent} = require './core'
 
 module.exports = createComponent
   render: ->

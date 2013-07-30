@@ -8,8 +8,8 @@
 
 React = require 'react-tools/build/modules/react'
 Timestamp = require 'react-time'
-{createComponent} = require './core.coffee'
-CommitLine = require './commit_line.coffee'
+{createComponent} = require './core'
+CommitLine = require './commit_line'
 
 sameDay = (a, b) ->
   return false unless b?

@@ -2,7 +2,6 @@
 
   * [ ] generate models from representations?
   * [ ] tooltips?
-  * [ ] make auth optional
   * [x] refactor UI components into reusable pieces
   * [ ] refactor styles into more reusable pieces
   * [ ] make new button styles

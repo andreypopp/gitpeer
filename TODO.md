@@ -20,6 +20,7 @@
   * [x] CommitStatus: proper formatting of commits messages
     * [ ] should we use monospace font for message?
   * [x] CommitStatus: make clickable area larger
+  * [ ] profile for performance
 
 # future releases
 

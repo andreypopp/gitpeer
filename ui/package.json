@@ -4,7 +4,7 @@
   "description": "UI for gitman",
   "main": "index.js",
   "dependencies": {
-    "react-tools": "~0.4.0",
+    "react-tools": "~0.4.1",
     "react-time": "~0.2.0",
     "backbone": "~1.0.0",
     "backbone.record": "~0.9.1",

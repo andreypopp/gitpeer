@@ -17,15 +17,6 @@ Auth = require './auth'
 
 App = createComponent
 
-  handleClick: (e) ->
-    href = if e.nativeEvent.toElement?.tagName == 'A'
-      e.nativeEvent.toElement.attributes?.href?.value
-    else if e.nativeEvent.toElement?.parentNode?.tagName == 'A'
-      e.nativeEvent.toElement.parentNode.attributes?.href?.value
-    if href? and (not /^https?:\/\//.exec href) and (not /^\/auth/.exec href)
-      e.preventDefault()
-      this.router.navigate(href, trigger: true)
-
   show: (model) ->
     this.setState(model: model)
 
@@ -42,7 +33,17 @@ App = createComponent
     else
       null
 
+  componentWillUnmount: ->
+    $(document).off 'click.route'
+
   componentDidMount: (node) ->
+    $(document).on 'click.route', 'a', (e) =>
+      href = if e.currentTarget.tagName == 'A'
+        e.currentTarget.attributes?.href?.value
+      if href? and (not /^https?:\/\//.exec href) and (not /^\/auth/.exec href)
+        e.preventDefault()
+        this.router.navigate(href, trigger: true)
+
     this.router = new Router
       routes:
         '': 'contents'
@@ -66,7 +67,7 @@ App = createComponent
     commit = model?.commit
     name = window.__data?.name or 'project'
 
-    `<div class="App" onClick={this.handleClick}>
+    `<div class="App">
       <header>
         <a class="name" href="/">{name}</a>
         <div class="nav">

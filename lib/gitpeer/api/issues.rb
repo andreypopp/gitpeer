@@ -8,15 +8,23 @@ module GitPeer::API
   class Issues < GitPeer::Controller
     include GitPeer::Controller::JSONRepresentation
 
-    uri :issues,  '/'
+    uri :issues,  '/{?state}'
     uri :issue,   '/{id}'
+
+    def issues_count(state = OPENED)
+      db.execute("select count(*) from issues where state = ?", state).first[0]
+    end
+
+    def issues(state = OPENED)
+      db.execute("select * from issues where state = ? order by updated desc", state)
+    end
 
     get :issues do
       state = param :state, default: 'opened'
 
-      issues = db.execute "select * from issues where state = ?", state
-      issues = issues.map { |row| Issue.new(*row) }
-      json Issues.new(issues.to_a)
+      is = issues(state).map { |row| Issue.new(*row) }
+      stats = {opened: issues_count(OPENED), closed: issues_count(CLOSED)}
+      json Issues.new(is.to_a, stats)
     end
 
     post :issues do
@@ -51,13 +59,14 @@ module GitPeer::API
       json Issue.new(*issue)
     end
 
-    Issues = Struct.new(:issues)
+    Issues = Struct.new(:issues, :stats)
     # possible state values: opened, closed
     Issue = Struct.new(:id, :name, :body, :state, :created, :updated)
     OPENED = 'opened'
     CLOSED = 'closed'
 
     representation Issues do
+      property :stats
       collection :issues, resolve: true
       link :self do
         uri :issues

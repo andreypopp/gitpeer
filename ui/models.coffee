@@ -126,3 +126,20 @@ class exports.Comment extends Record
 
 class exports.Comments extends Collection
   model: exports.Comment
+
+class exports.Issue extends Record
+  @define
+    name: null
+    body: null
+    created: Date
+    updated: Date
+    state: null
+
+class exports.IssuesCollection extends Collection
+  model: exports.Issue
+
+class exports.Issues extends Record
+  url: "/api/issues"
+  @define
+    issues: exports.IssuesCollection
+    stats: null

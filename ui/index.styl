@@ -22,6 +22,12 @@ body
   background: bg
   color: color
 
+shadow-control()
+  font-weight: bold
+  color: dkcolor
+  &:hover
+    color: color
+
 monospace()
   font-family: 'Menlo', 'Monaco', monospace
   color: color
@@ -90,10 +96,8 @@ small()
     .nav
       display: inline-block
       a
-        color: dkcolor
+        shadow-control()
         margin-right: 0.5em
-      a:hover
-        color: color
 
   .CommitLine
     margin-top: 1em
@@ -183,6 +187,31 @@ small()
     font-size: 90%
     color: dkcolor
     float: right
+
+.IssueView
+  clearfix()
+  display: block
+  font-size: 80%
+  cursor: pointer
+  padding: 7px
+  &:hover
+    background: hlcolor
+  .name
+    float: left
+  time
+    font-size: 90%
+    float: right
+    color: dkcolor
+
+.IssuesView
+  .meta
+    font-size: 80%
+    margin-top: 1em
+    margin-bottom: 2em
+    a
+      shadow-control()
+      display: inline-block
+      margin-right: 7px
 
 .HistoryView
 

@@ -9,10 +9,11 @@ $ = require 'jqueryify'
 React = require 'react-tools/build/modules/react'
 
 {renderComponent, createComponent} = require './components/core'
-{History, Comment, Contents, Commit, Tree, Blob} = require './models'
+{History, Comment, Contents, Commit, Tree, Blob, Issues} = require './models'
 CommitView = require './components/commit_view'
 ContentsView = require './components/contents_view'
 HistoryView = require './components/history_view'
+IssuesView = require './components/issues_view'
 Auth = require './auth'
 
 App = createComponent
@@ -25,11 +26,13 @@ App = createComponent
 
   viewFor: (model) ->
     if model instanceof Contents
-      `<ContentsView model={model} />`
+      ContentsView {model}
     else if model instanceof History
-      `<HistoryView model={model} />`
+      HistoryView {model}
     else if model instanceof Commit
-      `<CommitView model={model} />`
+      CommitView {model}
+    else if model instanceof Issues
+      IssuesView {model}
     else
       null
 
@@ -52,6 +55,7 @@ App = createComponent
         'history': 'history'
         'history/:ref': 'history'
         'commit/:id': 'commit'
+        'issues': 'issues'
 
     this.router.on 'route:contents', (ref = 'master', path = '/') =>
       this.fetchAndShow new Contents(ref: ref, path: path)
@@ -61,6 +65,9 @@ App = createComponent
 
     this.router.on 'route:commit', (id) =>
       this.fetchAndShow new Commit(id: id)
+
+    this.router.on 'route:issues', (id) =>
+      this.fetchAndShow new Issues()
 
   render: ->
     model = this.getModel()
@@ -73,6 +80,7 @@ App = createComponent
         <div class="nav">
           <a href="/contents">code</a>
           <a href="/history">history</a>
+          <a href="/issues">issues</a>
         </div>
       </header>
       <AuthStatus user={this.props.user} />

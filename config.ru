@@ -1,9 +1,11 @@
+require 'sqlite3'
 require 'scorched'
 require 'omniauth'
 require 'omniauth-github'
 require 'gitpeer'
 require 'gitpeer/auth'
 require 'gitpeer/api/repository'
+require 'gitpeer/api/issues'
 
 class App < GitPeer::Controller
   uri :page_root,          '/'
@@ -13,6 +15,7 @@ class App < GitPeer::Controller
   uri :page_commit,        '/commit/{id}'
   uri :page_blob,          '/blob/{id}'
 
+  db = SQLite3::Database.new("./.git/gitpeer.db")
   assets = Rack::File.new('ui/assets')
 
   auth = GitPeer::Auth.configure do
@@ -20,6 +23,8 @@ class App < GitPeer::Controller
       '0db74a96913fc2b5fb54',
       'fd0a74f0b3fa2f2722b8ba0dae191dcb29be8c7b'
   end
+
+  issues = GitPeer::API::Issues.configure(db: db)
 
   git = GitPeer::API::Repository.configure(repo_path: '.') do
 
@@ -76,9 +81,10 @@ class App < GitPeer::Controller
     end
   end
 
-  mount '/api',   git
-  mount '/auth',  auth
-  mount '/a',     assets
+  mount '/api/issues',  issues
+  mount '/api',         git
+  mount '/auth',        auth
+  mount '/a',           assets
 
   get '/**' do
     page(

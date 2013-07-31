@@ -72,6 +72,8 @@ class GitPeer::Controller < Scorched::Controller
 
     def mounted(controller); end
 
+    def configured; end
+
     ##
     # Configure controller with class methods or by passing a block
     #
@@ -85,13 +87,15 @@ class GitPeer::Controller < Scorched::Controller
       end
       copy_over = Hash[copy_over.compact]
 
-      Class::new(self) do
+      controller = Class::new(self) do
         copy_over.each_pair do |n, v|
           instance_variable_set(n, v)
         end
         config << options
         class_eval(&block) if block_given?
       end
+      controller.configured
+      controller
     end
 
     ##

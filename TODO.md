@@ -4,6 +4,7 @@
         currently it is done through a[href] but that cannot (?) be catched
         reliable via React
   * [ ] generate models from representations?
+  * [ ] generate representation for structs automatically
   * [ ] tooltips?
   * [ ] component registries per app, not per controller
   * [x] refactor UI components into reusable pieces

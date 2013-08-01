@@ -1,8 +1,19 @@
 require 'json'
 require 'date'
+require 'sequel'
 require 'digest/sha1'
 require 'gitpeer/controller'
 require 'gitpeer/controller/json_representation'
+
+class Sequel::Dataset
+
+  def as(cls)
+    to_a.map do |row|
+      values = cls.members.map { |k| row[k] }
+      cls.new(*values)
+    end
+  end
+end
 
 module GitPeer::API
   class Issues < GitPeer::Controller
@@ -11,34 +22,24 @@ module GitPeer::API
     uri :issues,  '/{?state}'
     uri :issue,   '/{id}'
 
-    def issues_count(state = OPENED)
-      db.execute("select count(*) from issues where state = ?", state).first[0]
-    end
-
-    def issues(state = OPENED)
-      db.execute("select * from issues where state = ? order by updated desc", state)
-    end
-
     get :issues do
       state = param :state, default: 'opened'
-
-      is = issues(state).map { |row| Issue.new(*row) }
-      stats = {opened: issues_count(OPENED), closed: issues_count(CLOSED)}
-      json Issues.new(is.to_a, stats)
+      issues = db[:issues].where(:state => state).as(Issue)
+      stats = db[:issues].group_and_count(:state).to_hash(:state, :count)
+      json Issues.new(issues, stats)
     end
 
     post :issues do
-      # XXX: doesn't work but should
-      # issue = representation(Issue).from_json(request.body.read)
-
-      now = DateTime.now.to_s
-      issue = JSON.parse request.body.read, symbolize_names: true
-      issue = Issue.new(generate_id, issue[:name], issue[:body], OPENED, now, now)
-      db.execute "
-        insert into issues(id, name, body, state, created, updated)
-        values(?, ?, ?, ?, ?, ?)", *issue.to_a
-      puts issue
-      json({a: 1})
+      now = DateTime.now
+      issue = representation(Issue)
+        .new(Issue.new)
+        .from_json(request.body.read)
+      issue.id = generate_id
+      issue.state = 'opened'
+      issue.created = now
+      issue.updated = now
+      db[:issues].insert(issue.to_h)
+      json(issue)
     end
 
     get :issue do
@@ -59,11 +60,8 @@ module GitPeer::API
       json Issue.new(*issue)
     end
 
-    Issues = Struct.new(:issues, :stats)
-    # possible state values: opened, closed
     Issue = Struct.new(:id, :name, :body, :state, :created, :updated)
-    OPENED = 'opened'
-    CLOSED = 'closed'
+    Issues = Struct.new(:issues, :stats)
 
     representation Issues do
       property :stats

@@ -1,8 +1,9 @@
-require 'sqlite3'
+require 'sequel'
 require 'scorched'
 require 'omniauth'
 require 'omniauth-github'
 require 'gitpeer'
+require 'gitpeer/controller'
 require 'gitpeer/auth'
 require 'gitpeer/api/repository'
 require 'gitpeer/api/issues'
@@ -15,7 +16,9 @@ class App < GitPeer::Controller
   uri :page_commit,        '/commit/{id}'
   uri :page_blob,          '/blob/{id}'
 
-  db = SQLite3::Database.new("./.git/gitpeer.db")
+  db = Sequel.connect('sqlite://.git/gitpeer.db')
+
+
   assets = Rack::File.new('ui/assets')
 
   auth = GitPeer::Auth.configure do

@@ -128,6 +128,9 @@ class exports.Comments extends Collection
   model: exports.Comment
 
 class exports.Issue extends Record
+  url: ->
+    "/api/issues#{this.id or ''}"
+
   @define
     name: null
     body: null

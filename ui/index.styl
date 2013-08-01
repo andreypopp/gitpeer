@@ -29,6 +29,8 @@ shadow-control()
     color: color
   &.active
     color: color
+  i
+    font-size: 90%
 
 monospace()
   font-family: 'Menlo', 'Monaco', monospace
@@ -196,7 +198,15 @@ small()
     color: dkcolor
     float: right
 
-.IssueView
+.IssueEditor
+  textarea
+    resize: none
+  .controls
+    a
+      margin-right: 14px
+      shadow-control()
+
+.IssueItemView
   clearfix()
   display: block
   font-size: 90%
@@ -213,13 +223,19 @@ small()
 
 .IssuesView
   .meta
-    font-size: 80%
+    clearfix()
     margin-top: 1em
     margin-bottom: 2em
-    a
+    .new-issue
       shadow-control()
-      display: inline-block
-      margin-right: 7px
+      float: left
+    .state-selector
+      font-size: 80%
+      float: right
+      a
+        shadow-control()
+        display: inline-block
+        margin-right: 7px
 
 .HistoryView
 

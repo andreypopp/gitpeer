@@ -9,11 +9,13 @@ $ = require 'jqueryify'
 React = require 'react-tools/build/modules/react'
 
 {renderComponent, createComponent} = require './components/core'
-{History, Comment, Contents, Commit, Tree, Blob, Issues} = require './models'
+{History, Comment, Contents, Commit, Tree, Blob, Issues, Issue} = require './models'
 CommitView = require './components/commit_view'
 ContentsView = require './components/contents_view'
 HistoryView = require './components/history_view'
 IssuesView = require './components/issues_view'
+IssueView = require './components/issue_view'
+IssueEditor = require './components/issue_editor'
 Auth = require './auth'
 
 App = createComponent
@@ -33,6 +35,8 @@ App = createComponent
       CommitView {model}
     else if model instanceof Issues
       IssuesView {model}
+    else if model instanceof Issue
+      if model.id? then IssueView {model} else IssueEditor {model}
     else
       null
 
@@ -58,6 +62,12 @@ App = createComponent
 
     this.props.router.on 'route:issues', (id) =>
       this.fetchAndShow new Issues()
+      
+    this.props.router.on 'route:issue', (id) =>
+      this.fetchAndShow new Issue(id: id)
+
+    this.props.router.on 'route:issues:new', (id) =>
+      this.show new Issue()
 
   render: ->
     model = this.getModel()
@@ -121,6 +131,8 @@ window.onload = ->
       'history': 'history'
       'history/:ref': 'history'
       'commit/:id': 'commit'
+      'issues/new': 'issues:new'
+      'issues/:id': 'issue'
       'issues': 'issues'
   GitMan.app = renderComponent(
     App(router: GitMan.router, user: GitMan.Auth.user()),

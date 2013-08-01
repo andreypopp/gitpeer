@@ -16,25 +16,14 @@ module.exports = core.createComponent
     $body = $(this.refs.body.getDOMNode())
     $body.autosize()
 
-  onCancel: ->
-    window.history.back()
-
-  onCreate: ->
-    model = this.getModel()
-    model.name = this.refs.name.getDOMNode().value
-    model.body = this.refs.body.getDOMNode().value
-    model.save().then (model) =>
-      GitPeer.router.navigate(model._links.self_html.href, trigger: true)
+  values: ->
+    name = this.refs.name.getDOMNode().value
+    body = this.refs.body.getDOMNode().value
+    {name, body}
 
   render: ->
     model = this.getModel()
     `<div class="IssueEditor">
-      <form>
-        <input ref="name" class="name" placeholder="Issue name" type="text" value={model.name} />
-        <textarea ref="body" class="body" placeholder="Describe issue">{model.body}</textarea>
-      </form>
-      <div class="controls">
-        <a onClick={this.onCreate} class="save"><i class="icon icon-plus"></i> Create</a>
-        <a onClick={this.onCancel} class="cancel"><i class="icon icon-remove"></i> Cancel</a>
-      </div>
+      <input ref="name" class="name" placeholder="Issue name" type="text" value={model.name} />
+      <textarea ref="body" class="body" placeholder="Describe issue">{model.body}</textarea>
      </div>`

@@ -14,7 +14,7 @@ ContentsView = require './components/contents_view'
 HistoryView = require './components/history_view'
 IssuesView = require './components/issues_view'
 IssueView = require './components/issue_view'
-IssueEditor = require './components/issue_editor'
+NewIssueView = require './components/new_issue_view'
 Auth = require './auth'
 
 App = core.createComponent
@@ -35,7 +35,7 @@ App = core.createComponent
     else if model instanceof Issues
       IssuesView {model}
     else if model instanceof Issue
-      if model.id? then IssueView {model} else IssueEditor {model}
+      if model.id? then IssueView {model} else NewIssueView {model}
     else
       null
 

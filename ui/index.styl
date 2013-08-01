@@ -69,6 +69,12 @@ small()
     &:hover
       color: #000
 
+.Controls
+  a
+    user-select: none
+    margin-right: 14px
+    shadow-control()
+
 .AuthStatus
   font-size: 80%
 
@@ -237,6 +243,19 @@ small()
     font-size: 90%
     float: right
     color: dkcolor
+
+.IssueView
+  position: relative
+  .Controls
+    width: 150px
+    right: -150px
+    position: absolute
+    text-align: left
+    a
+      display: block
+    i
+      display: inline-block
+      width: 1.5em
 
 .IssuesView
   .meta

@@ -154,13 +154,22 @@ class GitPeer::Controller < Scorched::Controller
 
     def page(title: 'Unnamed Page',
              scripts: [],
-             stylesheets: [])
+             stylesheets: [],
+             data: nil)
       stylesheets = stylesheets
         .map { |href| "<link rel='stylesheet' href='#{href}' />" }
         .join
       scripts = scripts
         .map { |href| "<script src='#{href}'></script>" }
         .join
+
+      if data
+        scripts << "
+          <script>
+            var __data = #{json(data)};
+          </script>"
+      end
+
       "
       <!doctype>
       <title>#{title}</title>

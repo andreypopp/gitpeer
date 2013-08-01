@@ -101,6 +101,14 @@ module GitPeer::Controller::JSONRepresentation
 
   end
 
+  def body_as(cls)
+    representation(cls).new(cls.new).from_json(request.body.read)
+  end
+
+  def body
+    JSON.parse request.body.read, symbolize_names: true
+  end
+
   def json(obj, with: nil)
     response['Content-Type'] = 'application/json'
     with = get_representation(obj.class, raise_on_missing: false) unless with

@@ -18,7 +18,6 @@ class App < GitPeer::Controller
 
   db = Sequel.connect('sqlite://.git/gitpeer.db')
 
-
   assets = Rack::File.new('ui/assets')
 
   auth = GitPeer::Auth.configure do

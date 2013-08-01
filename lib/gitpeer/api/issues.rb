@@ -1,19 +1,10 @@
 require 'json'
 require 'date'
 require 'sequel'
+require 'sequel/extensions'
 require 'digest/sha1'
 require 'gitpeer/controller'
 require 'gitpeer/controller/json_representation'
-
-class Sequel::Dataset
-
-  def as(cls)
-    to_a.map do |row|
-      values = cls.members.map { |k| row[k] }
-      cls.new(*values)
-    end
-  end
-end
 
 module GitPeer::API
   class Issues < GitPeer::Controller
@@ -21,6 +12,9 @@ module GitPeer::API
 
     uri :issues,  '/{?state}'
     uri :issue,   '/{id}'
+
+    Issue = Struct.new(:id, :name, :body, :state, :created, :updated)
+    Issues = Struct.new(:issues, :stats)
 
     get :issues do
       state = param :state, default: 'opened'
@@ -68,9 +62,6 @@ module GitPeer::API
       json issue
     end
 
-    Issue = Struct.new(:id, :name, :body, :state, :created, :updated)
-    Issues = Struct.new(:issues, :stats)
-
     representation Issues do
       property :stats
       collection :issues, resolve: true
@@ -97,29 +88,20 @@ module GitPeer::API
       Digest::SHA1.hexdigest(seed)
     end
 
-    def body_as(cls)
-      representation(cls).new(cls.new).from_json(request.body.read)
-    end
-
-    def body
-      JSON.parse request.body.read, symbolize_names: true
-    end
-
     def self.db
       config[:db]
     end
 
     def self.configured
-      db.execute "
-        create table if not exists issues(
-          id text,
+      db["create table if not exists issues(
+          id text primary key,
           name text,
           body text,
           state text,
           created text,
           updated text
         );
-        "
+      "]
     end
 
   end

@@ -61,7 +61,7 @@ App = core.createComponent
 
     this.props.router.on 'route:issues', (id) =>
       this.fetchAndShow new Issues()
-      
+
     this.props.router.on 'route:issue', (id) =>
       this.fetchAndShow new Issue(id: id)
 
@@ -120,9 +120,9 @@ AuthStatus = core.createComponent
        </div>`
 
 window.onload = ->
-  GitMan = window.GitMan = {}
-  GitMan.Auth = Auth
-  GitMan.router = new Router
+  GitPeer = window.GitPeer = {}
+  GitPeer.Auth = Auth
+  GitPeer.router = new Router
     routes:
       '': 'contents'
       'contents': 'contents'
@@ -133,11 +133,11 @@ window.onload = ->
       'issues/new': 'issues:new'
       'issues/:id': 'issue'
       'issues': 'issues'
-  GitMan.app = core.renderComponent(
-    App(router: GitMan.router, user: GitMan.Auth.user()),
+  GitPeer.app = core.renderComponent(
+    App(router: GitPeer.router, user: GitPeer.Auth.user()),
     document.body)
 
-  GitMan.Auth.on 'user', (user) ->
-    GitMan.app.setProps {user}
+  GitPeer.Auth.on 'user', (user) ->
+    GitPeer.app.setProps {user}
 
   history.start(pushState: true)

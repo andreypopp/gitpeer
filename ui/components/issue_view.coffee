@@ -12,7 +12,8 @@ core = require './core'
 
 module.exports = core.createComponent
   render: ->
+    model = this.getModel()
     `<div class="IssueView">
-      <h1>{model.name}</h1>
+      <h3>{model.name}</h3>
       <p>{model.body}</p>
      </div>`

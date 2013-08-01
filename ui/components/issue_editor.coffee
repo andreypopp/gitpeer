@@ -23,8 +23,8 @@ module.exports = core.createComponent
     model = this.getModel()
     model.name = this.refs.name.getDOMNode().value
     model.body = this.refs.body.getDOMNode().value
-    model.save()
-    GitMan.app.show(model)
+    model.save().then (model) =>
+      GitPeer.router.navigate(model._links.self_html.href, trigger: true)
 
   render: ->
     model = this.getModel()

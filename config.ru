@@ -15,6 +15,8 @@ class App < GitPeer::Controller
   uri :page_path_history,  '/history/{ref}{+path}{?limit,after}'
   uri :page_commit,        '/commit/{id}'
   uri :page_blob,          '/blob/{id}'
+  uri :page_issues,        '/issues'
+  uri :page_issue,         '/issues/{id}'
 
   db = Sequel.connect('sqlite://.git/gitpeer.db')
 
@@ -26,7 +28,15 @@ class App < GitPeer::Controller
       'fd0a74f0b3fa2f2722b8ba0dae191dcb29be8c7b'
   end
 
-  issues = GitPeer::API::Issues.configure(db: db)
+  issues = GitPeer::API::Issues.configure(db: db) do
+    extend_representation GitPeer::API::Issues::Issue do
+      link :self_html do uri :page_issue, id: represented.id end
+    end
+
+    extend_representation GitPeer::API::Issues::Issues do
+      link :self_html do uri :page_issues end
+    end
+  end
 
   git = GitPeer::API::Repository.configure(repo_path: '.') do
 

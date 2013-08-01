@@ -129,7 +129,7 @@ class exports.Comments extends Collection
 
 class exports.Issue extends Record
   url: ->
-    "/api/issues#{this.id or ''}"
+    if this.is then "/api/issues/#{this.id}" else "/api/issues"
 
   @define
     name: null

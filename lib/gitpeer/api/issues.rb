@@ -31,9 +31,7 @@ module GitPeer::API
 
     post :issues do
       now = DateTime.now
-      issue = representation(Issue)
-        .new(Issue.new)
-        .from_json(request.body.read)
+      issue = body_as Issue
       issue.id = generate_id
       issue.state = 'opened'
       issue.created = now
@@ -44,20 +42,30 @@ module GitPeer::API
 
     get :issue do
       id = captures[:id]
-      issue = db.execute("select * from issues where id = ?", id).first
+      issue = db[:issues].where(:id => id).as(Issue).first
       not_found unless issue
-      json Issue.new(*issue)
+      json issue
     end
 
     patch :issue do
+      id = captures[:id]
+      issue = db[:issues].where(id: id).as(Issue).first
+      not_found unless issue
+      values = body.select { |k, v| [:name, :body].contains k }
+      unless values.empty?
+        db[:issues].where(id: id).update(**values)
+        values.each { |k, v| issue[k] = v }
+      end
+      json issue
     end
 
     delete :issue do
       id = captures[:id]
-      issue = db.execute "select * from issues where id = ?", id
-      db.execute "delete * from issues where id = ?", id
+      id = captures[:id]
+      issue = db[:issues].where(:id => id).as(Issue).first
       not_found unless issue
-      json Issue.new(*issue)
+      db[:issues].where(:id => id).delete
+      json issue
     end
 
     Issue = Struct.new(:id, :name, :body, :state, :created, :updated)
@@ -87,6 +95,14 @@ module GitPeer::API
       srand
       seed = "--#{rand(10000)}--#{Time.now}--"
       Digest::SHA1.hexdigest(seed)
+    end
+
+    def body_as(cls)
+      representation(cls).new(cls.new).from_json(request.body.read)
+    end
+
+    def body
+      JSON.parse request.body.read, symbolize_names: true
     end
 
     def self.db

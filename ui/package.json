@@ -20,7 +20,7 @@
   "devDependencies": {
     "coffee-script": "~1.6.3",
     "coffeeify": "~0.5.1",
-    "reactify": "~0.2.0",
+    "reactify": "~0.2.2",
     "browserify": "git://github.com/andreypopp/node-browserify#master",
     "watchify": "~0.1.0",
     "stylus": "~0.34.1",

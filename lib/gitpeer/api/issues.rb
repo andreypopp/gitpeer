@@ -18,7 +18,7 @@ module GitPeer::API
 
     get :issues do
       state = param :state, default: 'opened'
-      issues = db[:issues].where(:state => state).as(Issue)
+      issues = db[:issues].where(:state => state).reverse(:updated).as(Issue)
       stats = db[:issues].group_and_count(:state).to_hash(:state, :count)
       json Issues.new(issues, stats)
     end
@@ -45,7 +45,7 @@ module GitPeer::API
       id = captures[:id]
       issue = db[:issues].where(id: id).as(Issue).first
       not_found unless issue
-      values = body.select { |k, v| [:name, :body].contains k }
+      values = body.select { |k, v| [:name, :body, :state].include? k }
       unless values.empty?
         db[:issues].where(id: id).update(**values)
         values.each { |k, v| issue[k] = v }

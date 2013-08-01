@@ -45,28 +45,18 @@ App = createComponent
         e.currentTarget.attributes?.href?.value
       if href? and (not /^https?:\/\//.exec href) and (not /^\/auth/.exec href)
         e.preventDefault()
-        this.router.navigate(href, trigger: true)
+        this.props.router.navigate(href, trigger: true)
 
-    this.router = new Router
-      routes:
-        '': 'contents'
-        'contents': 'contents'
-        'contents/:ref/*path': 'contents'
-        'history': 'history'
-        'history/:ref': 'history'
-        'commit/:id': 'commit'
-        'issues': 'issues'
-
-    this.router.on 'route:contents', (ref = 'master', path = '/') =>
+    this.props.router.on 'route:contents', (ref = 'master', path = '/') =>
       this.fetchAndShow new Contents(ref: ref, path: path)
 
-    this.router.on 'route:history', (ref = 'master') =>
+    this.props.router.on 'route:history', (ref = 'master') =>
       this.fetchAndShow new History(ref: ref)
 
-    this.router.on 'route:commit', (id) =>
+    this.props.router.on 'route:commit', (id) =>
       this.fetchAndShow new Commit(id: id)
 
-    this.router.on 'route:issues', (id) =>
+    this.props.router.on 'route:issues', (id) =>
       this.fetchAndShow new Issues()
 
   render: ->
@@ -77,15 +67,25 @@ App = createComponent
     `<div class="App">
       <header>
         <a class="name" href="/">{name}</a>
-        <div class="nav">
-          <a href="/contents">code</a>
-          <a href="/history">history</a>
-          <a href="/issues">issues</a>
-        </div>
+        <Navigation router={this.props.router} />
       </header>
       <AuthStatus user={this.props.user} />
       {this.viewFor(model)}
      </div>`
+
+Navigation = createComponent
+  componentDidMount: ->
+    this.props.router.on 'route', => this.forceUpdate()
+
+  render: ->
+    _links = {
+      contents: {href: '/contents'},
+      history: {href: '/history'},
+      issues: {href: '/issues'},
+    }
+    links = for name, link of _links
+      `<a href={link.href}>{name}</a>`
+    `<div class="Navigation">{links}</div>`
 
 AuthStatus = createComponent
   signIn: ->
@@ -113,7 +113,18 @@ AuthStatus = createComponent
 window.onload = ->
   GitMan = window.GitMan = {}
   GitMan.Auth = Auth
-  GitMan.app = renderComponent(App(user: GitMan.Auth.user()), document.body)
+  GitMan.router = new Router
+    routes:
+      '': 'contents'
+      'contents': 'contents'
+      'contents/:ref/*path': 'contents'
+      'history': 'history'
+      'history/:ref': 'history'
+      'commit/:id': 'commit'
+      'issues': 'issues'
+  GitMan.app = renderComponent(
+    App(router: GitMan.router, user: GitMan.Auth.user()),
+    document.body)
 
   GitMan.Auth.on 'user', (user) ->
     GitMan.app.setProps {user}

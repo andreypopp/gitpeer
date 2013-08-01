@@ -27,6 +27,8 @@ shadow-control()
   color: dkcolor
   &:hover
     color: color
+  &.active
+    color: color
 
 monospace()
   font-family: 'Menlo', 'Monaco', monospace
@@ -85,22 +87,22 @@ small()
     font-weight: bold
     cursor: pointer
 
-    a
-      color: color
-      text-decoration: none
-
     .name
+      color: color
       font-size: 170%
       margin-right: 0.5em
+      text-decoration: none
 
-    .nav
+    .Navigation
       display: inline-block
-      a
-        shadow-control()
-        margin-right: 0.5em
 
   .CommitLine
     margin-top: 1em
+
+.Navigation
+  a
+    shadow-control()
+    margin-right: 0.5em
 
 .DirectoryContentsView
   ul, li

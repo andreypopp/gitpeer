@@ -1,6 +1,6 @@
 {Model, Collection} = require 'backbone'
 React = require 'react-tools/build/modules/react'
-{isString} = require 'underscore'
+{isString, extend} = require 'underscore'
 
 isObservable = (o) ->
   (o instanceof Collection) or (o instanceof Model)
@@ -46,6 +46,4 @@ createComponent = (spec) ->
   spec.mixins = (spec.mixins or []).concat [Base]
   React.createClass(spec)
 
-module.exports = {
-  createComponent, renderComponent: React.renderComponent,
-  deserialized, isObservable}
+module.exports = extend {}, React, {createComponent, deserialized, isObservable}

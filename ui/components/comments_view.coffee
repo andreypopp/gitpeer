@@ -2,17 +2,16 @@
 
   Comments view
 
-  @jsx React.DOM
+  @jsx core.DOM
 
 ###
 
-React = require 'react-tools/build/modules/react'
 Timestamp = require 'react-time'
 
-{createComponent} = require './core'
+core = require './core'
 {Comment} = require '../models'
 
-CommentView = createComponent
+CommentView = core.createComponent
 
   onMouseEnter: ->
     this.props.onMouseEnter?(this.getModel(), this)
@@ -32,7 +31,7 @@ CommentView = createComponent
       </div>
      </div>`
 
-module.exports = createComponent
+module.exports = core.createComponent
 
   render: ->
     model = this.getModel()

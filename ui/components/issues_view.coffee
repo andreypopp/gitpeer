@@ -2,15 +2,14 @@
 
   Issues view
 
-  @jsx React.DOM
+  @jsx core.DOM
 
 ###
 
-React = require 'react-tools/build/modules/react'
 Timestamp = require 'react-time'
-{createComponent} = require './core'
+core = require './core'
 
-IssueItemView = createComponent
+IssueItemView = core.createComponent
   render: ->
     model = this.getModel()
     href = "/issues/#{model.id}"
@@ -19,7 +18,7 @@ IssueItemView = createComponent
       <Timestamp value={model.updated} relative />
      </a>`
 
-module.exports = createComponent
+module.exports = core.createComponent
   render: ->
     model = this.getModel()
     issues = for issue in model.issues.models

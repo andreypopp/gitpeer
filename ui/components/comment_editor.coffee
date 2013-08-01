@@ -2,17 +2,16 @@
 
   Comment editor
 
-  @jsx React.DOM
+  @jsx core.DOM
 
 ###
 
-React = require 'react-tools/build/modules/react'
 $ = require 'jqueryify'
 require 'jquery-autosize/jquery.autosize'
 
-{createComponent} = require './core'
+core = require './core'
 
-module.exports = createComponent
+module.exports = core.createComponent
 
   onSubmit: ->
     comment = new Comment

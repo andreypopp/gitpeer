@@ -2,19 +2,18 @@
 
   Contents view
 
-  @jsx React.DOM
+  @jsx core.DOM
 
 ###
 
-React = require 'react-tools/build/modules/react'
 Timestamp = require 'react-time'
 uriTemplate = require 'uri-template'
 
 BlobView = require './blob_view'
 CommitLine = require './commit_line'
-{createComponent} = require './core'
+core = require './core'
 
-DirectoryContentsView = createComponent
+DirectoryContentsView = core.createComponent
 
   createEntryView: (entry) ->
     icon = switch entry.type
@@ -36,7 +35,7 @@ DirectoryContentsView = createComponent
       <ul>{model.tree.entries.map(this.createEntryView)}</ul>
      </div>`
 
-Breadcrumb = createComponent
+Breadcrumb = core.createComponent
 
   render: ->
     model = this.getModel()
@@ -61,7 +60,7 @@ Breadcrumb = createComponent
       {elems}
      </ul>`
 
-module.exports = createComponent
+module.exports = core.createComponent
   render: ->
     model = this.getModel()
     contents = if model.tree?

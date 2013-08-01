@@ -2,13 +2,12 @@
 
   History view
 
-  @jsx React.DOM
+  @jsx core.DOM
 
 ###
 
-React = require 'react-tools/build/modules/react'
 Timestamp = require 'react-time'
-{createComponent} = require './core'
+core = require './core'
 CommitLine = require './commit_line'
 
 sameDay = (a, b) ->
@@ -17,7 +16,7 @@ sameDay = (a, b) ->
     and a.getMonth() == b.getMonth() \
     and a.getDate() == b.getDate()
 
-module.exports = createComponent
+module.exports = core.createComponent
 
   next: ->
     this.getModel().fetchNext()

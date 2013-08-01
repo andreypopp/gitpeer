@@ -1,14 +1,13 @@
 ###*
-  @jsx React.DOM
+  @jsx core.DOM
 ###
 
 
 $ = require 'jqueryify'
 {resolve} = require 'kew'
 {Router, Model, Collection, history} = require 'backbone'
-React = require 'react-tools/build/modules/react'
 
-{renderComponent, createComponent} = require './components/core'
+core = require './components/core'
 {History, Comment, Contents, Commit, Tree, Blob, Issues, Issue} = require './models'
 CommitView = require './components/commit_view'
 ContentsView = require './components/contents_view'
@@ -18,7 +17,7 @@ IssueView = require './components/issue_view'
 IssueEditor = require './components/issue_editor'
 Auth = require './auth'
 
-App = createComponent
+App = core.createComponent
 
   show: (model) ->
     this.setState(model: model)
@@ -83,7 +82,7 @@ App = createComponent
       {this.viewFor(model)}
      </div>`
 
-Navigation = createComponent
+Navigation = core.createComponent
   componentDidMount: ->
     this.props.router.on 'route', => this.forceUpdate()
 
@@ -97,7 +96,7 @@ Navigation = createComponent
       `<a href={link.href}>{name}</a>`
     `<div class="Navigation">{links}</div>`
 
-AuthStatus = createComponent
+AuthStatus = core.createComponent
   signIn: ->
     window.open('/auth/github')
 
@@ -134,7 +133,7 @@ window.onload = ->
       'issues/new': 'issues:new'
       'issues/:id': 'issue'
       'issues': 'issues'
-  GitMan.app = renderComponent(
+  GitMan.app = core.renderComponent(
     App(router: GitMan.router, user: GitMan.Auth.user()),
     document.body)
 

@@ -2,15 +2,15 @@
 
   Issues view
 
-  @jsx React.DOM
+  @jsx core.DOM
 
 ###
 
 React = require 'react-tools/build/modules/react'
 Timestamp = require 'react-time'
-{createComponent} = require './core'
+core = require './core'
 
-module.exports = createComponent
+module.exports = core.createComponent
   render: ->
     `<div class="IssueView">
       <h1>{model.name}</h1>

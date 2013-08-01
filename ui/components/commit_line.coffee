@@ -2,13 +2,12 @@
 
   Render commit summary in a line
 
-  @jsx React.DOM
+  @jsx core.DOM
 
 ###
 
-React = require 'react-tools/build/modules/react'
 Timestamp = require 'react-time'
-{createComponent} = require './core'
+core = require './core'
 
 formatMessage = (message) ->
   [headline, message] = message.split('\n\n')
@@ -19,7 +18,7 @@ formatMessage = (message) ->
       .map (line) -> `<p>{line}</p>`
   {headline, message}
 
-module.exports = createComponent
+module.exports = core.createComponent
 
   getInitialState: ->
     showMessage: not this.props.nomessage?

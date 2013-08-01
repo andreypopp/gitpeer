@@ -2,20 +2,19 @@
 
   Render commit summary in a line
 
-  @jsx React.DOM
+  @jsx core.DOM
 
 ###
 
-React = require 'react-tools/build/modules/react'
 {Filtered} = require 'backbone.projections/filtered'
 
-{createComponent} = require './core'
+core = require './core'
 DiffView = require './diff_view'
 CommitLine = require './commit_line'
 CommentEditor = require './comment_editor'
 CommentsView = require './comments_view'
 
-module.exports = createComponent
+module.exports = core.createComponent
 
   onComment: (comment) ->
     model = this.getModel()

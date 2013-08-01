@@ -2,14 +2,13 @@
 
   Blob view
 
-  @jsx React.DOM
+  @jsx core.DOM
 
 ###
 
-React = require 'react-tools/build/modules/react'
-{createComponent} = require './core'
+core = require './core'
 
-module.exports = createComponent
+module.exports = core.createComponent
   render: ->
     blob = this.getModel()
     `<div class="BlobView">

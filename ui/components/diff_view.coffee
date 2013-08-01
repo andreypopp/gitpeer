@@ -22,15 +22,14 @@
 
   - LineSelection - tracking hunk's selection state
 
-  @jsx React.DOM
+  @jsx core.DOM
 
 ###
 
-React = require 'react-tools/build/modules/react'
 {Filtered} = require 'backbone.projections/filtered'
 {contains} = require 'underscore'
 
-{createComponent} = require './core'
+core = require './core'
 CommentEditor = require './comment_editor'
 CommentsView = require './comments_view'
 
@@ -38,7 +37,7 @@ HasComments =
   componentDidMount: ->
     this.observe(this.props.comments) if this.props.comments
 
-module.exports = createComponent
+module.exports = core.createComponent
   mixins: [HasComments]
 
   render: ->
@@ -49,7 +48,7 @@ module.exports = createComponent
       PatchView(model: patch, onComment: this.props.onComment, comments: comments)
     `<div class="DiffView">{patches}</div>`
 
-PatchView = createComponent
+PatchView = core.createComponent
   mixins: [HasComments]
 
   onComment: (comment) ->
@@ -72,7 +71,7 @@ PatchView = createComponent
       <div class="hunks">{hunks}</div>
      </div>`
 
-HunkView = createComponent
+HunkView = core.createComponent
   mixins: [HasComments]
 
   getInitialState: ->
@@ -136,7 +135,7 @@ HunkView = createComponent
       <div class="lines">{lines}</div>
      </div>`
 
-LineView = createComponent
+LineView = core.createComponent
   onClick: (e) ->
     this.props.hunk.onLineSelect(this.getModel(), e.nativeEvent.shiftKey)
 
@@ -211,7 +210,7 @@ LineView = createComponent
       {lineComments}
      </div>`
 
-SelectedLineRangeView = createComponent
+SelectedLineRangeView = core.createComponent
 
   render: ->
     lines = for line in this.getModel()

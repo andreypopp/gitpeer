@@ -26,8 +26,8 @@ module.exports = core.createComponent
     `<div class="IssuesView">
       <div class="meta">
         <div class="state-selector">
-          <a>opened ({model.stats.opened})</a>
-          <a>closed ({model.stats.closed})</a>
+          <a>opened ({model.stats.opened || 0})</a>
+          <a>closed ({model.stats.closed || 0})</a>
         </div>
         <a href="/issues/new" class="new-issue"><i class="icon icon-plus"></i> New issue</a>
       </div>

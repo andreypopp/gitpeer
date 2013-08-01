@@ -16,6 +16,16 @@ color = #444
 hlcolor = lighten(bg, 70%)
 dkcolor = lighten(color, 70%)
 
+input[type="text"], textarea
+  background: bg
+  border: none
+  border-bottom: 1px solid darken(bg, 5%)
+  box-shadow: none
+  &:focus
+    border-bottom: 1px solid darken(bg, 5%)
+    box-shadow: none
+    border: none
+
 body
   font-family: 'Source Sans Pro', sans-serif
   font-size: 100%
@@ -201,6 +211,10 @@ small()
 .IssueEditor
   textarea
     resize: none
+  form
+    margin-bottom: 2em
+  .name
+    font-size: 150%
   .controls
     a
       margin-right: 14px

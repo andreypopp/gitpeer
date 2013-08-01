@@ -1,5 +1,5 @@
 // @import url('http://fonts.googleapis.com/css?family=Open+Sans:700,300')
-@import url('http://fonts.googleapis.com/css?family=Open+Sans:700,300')
+@import url('http://fonts.googleapis.com/css?family=Source+Sans+Pro:700,300')
 
 @import "/a/font-awesome/css/font-awesome.css"
 @import "type-utils";
@@ -17,7 +17,7 @@ hlcolor = lighten(bg, 70%)
 dkcolor = lighten(color, 70%)
 
 body
-  font-family: 'Open Sans', sans-serif
+  font-family: 'Source Sans Pro', sans-serif
   font-size: 100%
   background: bg
   color: color
@@ -96,13 +96,15 @@ small()
     .Navigation
       display: inline-block
 
-  .CommitLine
-    margin-top: 1em
-
 .Navigation
   a
     shadow-control()
     margin-right: 0.5em
+
+.ContentsView
+  .CommitLine
+    margin: 1em 0em
+
 
 .DirectoryContentsView
   ul, li
@@ -164,9 +166,9 @@ small()
 
 .CommitLine
   display: block
+  margin: 0
   user-select: none
-  margin-bottom: 1em
-  font-size: 80%
+  font-size: 90%
   padding: 7px
   clearfix()
 
@@ -174,14 +176,14 @@ small()
     clearfix()
   .message
     margin: 7px
-    font-size: 90%
     color: darken(dkcolor, 40%)
     p
       margin-bottom: 0
   .headline, .author, .time, .sha
-    margin-right: 0.3em
+    margin-right: 0.5em
   .sha
     monospace()
+    font-size: 90%
     color: dkcolor
   .headline, .sha
     float: left
@@ -219,7 +221,6 @@ small()
 
   .CommitLine
     background: transparent
-    margin: 0
     cursor: pointer
     &:hover
       background: hlcolor
@@ -370,6 +371,8 @@ small()
 .CommitView
   .CommentView, .CommentEditor
     border-top: 1px solid lighten(dkcolor, 50%)
+  .CommitLine
+    margin: 1em 0
 
 .CommentView
   font-size: 85%

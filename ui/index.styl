@@ -1,13 +1,12 @@
-// @import url('http://fonts.googleapis.com/css?family=Open+Sans:700,300')
 @import url('http://fonts.googleapis.com/css?family=Source+Sans+Pro:700,300')
+
+$input-include-glowing-effect = false
 
 @import "/a/font-awesome/css/font-awesome.css"
 @import "type-utils";
 @import "foundation/variables"
 @import "foundation/components/global"
 @import "foundation/components/type"
-@import "foundation/components/forms"
-@import "foundation/components/buttons"
 @import "nib"
 
 app-width = 660px
@@ -15,16 +14,26 @@ bg = #f6f6f6
 color = #444
 hlcolor = lighten(bg, 70%)
 dkcolor = lighten(color, 70%)
+form-spacing = emCalc(16px)
 
 input[type="text"], textarea
+  display: block
+  height: emCalc(13px) + (form-spacing * 1.5)
+  margin: 0 0 form-spacing 0
+  padding: (form-spacing / 2)
+  box-sizing: border-box
+  font-size: 90%
+  width: 100%
   background: bg
   border: none
   border-bottom: 1px solid darken(bg, 5%)
   box-shadow: none
+  font-family: 'Source Sans Pro', sans-serif
   &:focus
+    outline: none
     border-bottom: 1px solid darken(bg, 5%)
     box-shadow: none
-    border: none
+    background: hlcolor
 
 body
   font-family: 'Source Sans Pro', sans-serif
@@ -227,7 +236,8 @@ small()
   form
     margin-bottom: 2em
   .name
-    font-size: 150%
+    font-size: $h3-font-size
+    font-weight: bold
   .controls
     a
       margin-right: 14px

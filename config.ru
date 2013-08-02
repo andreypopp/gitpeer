@@ -78,6 +78,22 @@ class App < GitPeer::Controller
           limit: represented.limit,
           after: represented.after
       end
+      link :next_html do
+        if represented.next_id
+          uri :page_history,
+            ref: represented.ref,
+            limit: represented.limit,
+            after: represented.next_id
+        end
+      end
+      link :prev_html do
+        if represented.prev_id
+          uri :page_history,
+            ref: represented.ref,
+            limit: represented.limit,
+            after: represented.prev_id
+        end
+      end
     end
 
     extend_representation GitPeer::API::Repository::Repository do

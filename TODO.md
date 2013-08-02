@@ -13,7 +13,7 @@
   * [ ] refactor styles into more reusable pieces
   * [ ] make new button styles
   * [ ] automatically generate top level navigation
-  * [ ] HistoryView: pagination
+  * [x] HistoryView: pagination
   * [ ] ContentsView: link not to the latest commit but to the commit which was
         latest for current path or its children
   * [ ] ContentsView: readme support

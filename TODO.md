@@ -3,6 +3,8 @@
   * [x] organize navigation around site
         currently it is done through a[href] but that cannot (?) be catched
         reliable via React
+  * [ ] Cmd (and something on other platforms) + Click on links should not
+    prevent browser from creating a new window with link's content
   * [ ] generate models from representations?
   * [ ] generate representation for structs automatically
   * [ ] tooltips?

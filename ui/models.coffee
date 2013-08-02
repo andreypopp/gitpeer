@@ -79,42 +79,16 @@ class exports.History extends Record
   @define
     ref: null
     commits: exports.Commits
+    after: null
+    limit: null
     _links: null
-
-  constructor: ->
-    this.pagination = {limit: 50}
-    super
 
   url: (pagination = this.pagination) ->
     params = {}
-    params.limit = pagination.limit if pagination.limit?
-    params.after = pagination.after if pagination.after?
+    params.after = this.after if this.after?
+    params.limit = this.limit if this.limit?
     query = unless $.isEmptyObject(params) then "?#{$.param(params)}" else ''
     url "/api/history/#{this.ref}#{query}"
-
-  parse: (resp, options) ->
-    if resp.commits.length == this.pagination.limit
-      this.pagination.next =
-        limit: this.pagination.limit
-        after: resp.commits.pop().id
-        prev: this.pagination
-    super(resp, options)
-
-  urlNext: ->
-    this.url(this.pagination.next)
-
-  urlPrev: ->
-    this.url(this.pagination.prev)
-
-  fetchNext: ->
-    if this.pagination.next?
-      this.pagination = this.pagination.next
-      this.fetch()
-
-  fetchPrev: ->
-    if this.pagination.prev?
-      this.pagination = this.pagination.prev
-      this.fetch()
 
 class exports.Comment extends Record
   @define

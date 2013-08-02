@@ -15,7 +15,8 @@
     "lazy-property": "0.0.2",
     "uri-template": "~0.4.1",
     "jqueryify": "~2.0.0",
-    "jquery-autosize": "~1.17.2"
+    "jquery-autosize": "~1.17.2",
+    "backbone-query-parameters": "git://github.com/andreypopp/backbone-query-parameters#master"
   },
   "devDependencies": {
     "coffee-script": "~1.6.3",

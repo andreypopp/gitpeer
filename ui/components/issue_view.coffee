@@ -6,10 +6,10 @@
 
 ###
 
-React = require 'react-tools/build/modules/react'
 Timestamp = require 'react-time'
 core = require './core'
 IssueEditor = require './issue_editor'
+Control = require './control'
 
 IssueView = core.createComponent
   render: ->
@@ -18,11 +18,6 @@ IssueView = core.createComponent
       <h3>{model.name}</h3>
       <p>{model.body}</p>
      </div>`
-
-Control = core.createClass
-  render: ->
-    iconCls = "icon icon-#{this.props.icon}"
-    `<a onClick={this.props.onClick}><i class={iconCls}></i> {this.props.label}</a>`
 
 module.exports = core.createComponent
 

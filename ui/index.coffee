@@ -6,6 +6,7 @@
 $ = require 'jqueryify'
 {resolve} = require 'kew'
 {Router, Model, Collection, history} = require 'backbone'
+require 'backbone-query-parameters'
 
 core = require './components/core'
 {History, Comment, Contents, Commit, Tree, Blob, Issues, Issue} = require './models'
@@ -55,8 +56,9 @@ App = core.createComponent
     this.props.router.on 'route:contents', (ref = 'master', path = '/') =>
       this.fetchAndShow new Contents(ref: ref, path: path)
 
-    this.props.router.on 'route:history', (ref = 'master') =>
-      this.fetchAndShow new History(ref: ref)
+    this.props.router.on 'route:history', (ref = 'master', params = {}) =>
+      history = new History(ref: ref, limit: params.limit, after: params.after)
+      this.fetchAndShow history
 
     this.props.router.on 'route:commit', (id) =>
       this.fetchAndShow new Commit(id: id)
@@ -120,6 +122,9 @@ AuthStatus = core.createComponent
           <a class="signin" onClick={this.signIn}>sign in with GitHub</a>
         </div>
        </div>`
+
+window._ = require 'underscore'
+window.Backbone = require 'backbone'
 
 window.onload = ->
   GitPeer = window.GitPeer = {}

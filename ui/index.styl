@@ -76,7 +76,7 @@ small()
     shadow-control()
   i
     display: inline-block
-    width: 1.2em
+    width: 1.5em
     text-align: center
 
 .AuthStatus
@@ -250,6 +250,7 @@ small()
 
 .IssueView
   position: relative
+
   .Controls
     width: 150px
     right: -150px
@@ -264,10 +265,9 @@ small()
 .IssuesView
   .meta
     clearfix()
-    margin-top: 1em
-    margin-bottom: 2em
-    .new-issue
-      shadow-control()
+
+    .Controls
+      margin: 1em
       float: left
     .state-selector
       font-size: 80%
@@ -278,6 +278,15 @@ small()
         margin-right: 7px
 
 .HistoryView
+
+  .Controls
+    font-size: 90%
+    margin: 1em
+    clearfix()
+    .next
+      float: right
+    .prev
+      float: left
 
   .CommitLine
     background: transparent
@@ -293,19 +302,6 @@ small()
     color: dkcolor
     time
       letter-spacing: 0.1em
-
-  .pager
-    user-select: none
-    margin: 1em
-    font-size: 80%
-    i
-      font-size: 70%
-
-    .prev, .next
-      display: inline-block
-      padding: 7px
-      &:hover
-        background: hlcolor
 
 .DiffView
 

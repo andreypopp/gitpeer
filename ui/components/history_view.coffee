@@ -9,6 +9,7 @@
 Timestamp = require 'react-time'
 core = require './core'
 CommitLine = require './commit_line'
+NextPrevPager = require './next_prev_pager'
 
 sameDay = (a, b) ->
   return false unless b?
@@ -17,26 +18,6 @@ sameDay = (a, b) ->
     and a.getDate() == b.getDate()
 
 module.exports = core.createComponent
-
-  next: ->
-    this.getModel().fetchNext()
-
-  prev: ->
-    this.getModel().fetchPrev()
-
-  $pager: ->
-    model = this.getModel()
-    if model.pagination?
-      next = if model.pagination.next
-        `<a class="next" href={model.urlNext()}>
-          <i class="icon-long-arrow-down"></i> older
-         </a>`
-      prev = if model.pagination.prev
-        `<a class="prev" href={model.urlPrev()}>
-          <i class="icon-long-arrow-up"></i> newer
-         </a>`
-      `<div class="pager">{next}{prev}</div>`
-
   render: ->
     model = this.getModel()
     date = undefined
@@ -49,8 +30,8 @@ module.exports = core.createComponent
       date = commit.author.time
       elements.push `<CommitLine notime nomessage model={commit} />`
     `<div class="HistoryView">
-      {this.$pager()}
+      <NextPrevPager model={model} nextLabel="Older commits" prevLabel="Newer commits" />
       <div class="commits">{elements}</div>
-      {this.$pager()}
+      <NextPrevPager model={model} nextLabel="Older commits" prevLabel="Newer commits" />
      </div>`
 

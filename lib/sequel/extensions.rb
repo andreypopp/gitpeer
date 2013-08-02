@@ -2,8 +2,9 @@ module Sequel
 
   class Dataset
 
-    def insertFrom(data)
-      insert data.to_h.select { |k, v| columns.include? k }
+    def insert_from(data)
+      data = data.to_h unless data.is_a? Hash
+      insert data.select { |k, v| columns.include? k }
     end
 
     def as(cls)

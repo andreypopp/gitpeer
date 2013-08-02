@@ -10,10 +10,10 @@ module GitPeer::API
   class Issues < GitPeer::Controller
     include GitPeer::Controller::JSONRepresentation
 
-    uri :issues,  '/{?state}'
-    uri :issue,   '/{id}'
+    uri :issues,       '/{?state}'
+    uri :issue,        '/{id}'
 
-    Issue = Struct.new(:id, :name, :body, :state, :created, :updated)
+    Issue = Struct.new(:id, :name, :body, :state, :created, :updated, :tags)
     Issues = Struct.new(:issues, :stats)
 
     get :issues do
@@ -26,18 +26,25 @@ module GitPeer::API
     post :issues do
       now = DateTime.now
       issue = body_as Issue
-      issue.id = generate_id
       issue.state = 'opened'
       issue.created = now
       issue.updated = now
-      db[:issues].insert(issue.to_h)
+      issue.id = db.transaction do
+        issue_id = db[:issues].insert_from issue
+        if issue.tags
+          tags = issue.tags.map { |t| {tag: t, issue_id: issue_id} }
+          db[:issue_tags].multi_insert tags
+        end
+        issue_id
+      end
       json(issue)
     end
 
     get :issue do
       id = captures[:id]
-      issue = db[:issues].where(:id => id).as(Issue).first
+      issue = db[:issues].where(id: id).as(Issue).first
       not_found unless issue
+      issue.tags = db[:issue_tags].where(issue_id: id).single_row(:tag)
       json issue
     end
 
@@ -47,10 +54,24 @@ module GitPeer::API
       not_found unless issue
       values = body.select { |k, v| [:name, :body, :state].include? k }
       unless values.empty?
+        values[:updated] = DateTime.now
         db[:issues].where(id: id).update(**values)
         values.each { |k, v| issue[k] = v }
       end
       json issue
+    end
+
+    # XXX: Add link/unlink method to Scorched
+    route :issue, method: ['LINK'] do
+      id = captures[:id]
+      tag = param :tag
+      db[:issue_tags].insert(issue_id: id, tag: tag)
+    end
+
+    route :issue, method: ['UNLINK'] do
+      id = captures[:id]
+      tag = param :tag
+      db[:issue_tags].where(issue_id: id, tag: tag).delete
     end
 
     delete :issue do
@@ -77,15 +98,10 @@ module GitPeer::API
       property :state
       property :created
       property :updated
+      property :tags
       link :self do
         uri :issue, id: represented.id
       end
-    end
-
-    def generate_id
-      srand
-      seed = "--#{rand(10000)}--#{Time.now}--"
-      Digest::SHA1.hexdigest(seed)
     end
 
     def self.db
@@ -93,15 +109,24 @@ module GitPeer::API
     end
 
     def self.configured
-      db["create table if not exists issues(
-          id text primary key,
-          name text,
-          body text,
-          state text,
-          created text,
-          updated text
-        );
-      "]
+
+      db.transaction do
+        db["create table if not exists issue_tags(
+            issue_id int,
+            tag text,
+            primary key (issue_id, tag)
+          );"].all
+
+        db["create table if not exists issues(
+            id integer primary key autoincrement,
+            name text,
+            body text,
+            state text,
+            created text,
+            updated text
+          );"].all
+
+      end
     end
 
   end

@@ -14,6 +14,10 @@ module Sequel
       end
     end
 
+    def single_row(column = 0)
+      map { |row| row[column] }
+    end
+
   end
 end
 

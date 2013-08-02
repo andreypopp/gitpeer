@@ -19,7 +19,7 @@ module.exports = core.createComponent
   onCreate: ->
     values = this.refs.editor.values()
     this.getModel().save(values).then (model) =>
-      GitPeer.router.navigate(model._links.self_html.href, trigger: true)
+      GitPeer.app.show(model)
 
   render: ->
     model = this.getModel()

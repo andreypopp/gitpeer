@@ -20,10 +20,12 @@ Auth = require './auth'
 App = core.createComponent
 
   show: (model) ->
-    this.setState(model: model)
+    href = model._links?.self_html?.href
+    throw new Error("can't show #{model}: no self_html link") unless href
+    this.props.router.navigate(href, trigger: true)
 
   fetchAndShow: (model, options) ->
-    model.fetch(options).then => this.show(model)
+    model.fetch(options).then => this.setState(model: model)
 
   viewFor: (model) ->
     if model instanceof Contents
@@ -66,7 +68,7 @@ App = core.createComponent
       this.fetchAndShow new Issue(id: id)
 
     this.props.router.on 'route:issues:new', (id) =>
-      this.show new Issue()
+      this.setState(model: new Issue())
 
   render: ->
     model = this.getModel()

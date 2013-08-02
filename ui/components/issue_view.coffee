@@ -19,23 +19,28 @@ IssueView = core.createComponent
       <p>{model.body}</p>
      </div>`
 
+Control = core.createClass
+  render: ->
+    iconCls = "icon icon-#{this.props.icon}"
+    `<a onClick={this.props.onClick}><i class={iconCls}></i> {this.props.label}</a>`
+
 module.exports = core.createComponent
 
   $stateToggle: ->
     model = this.getModel()
     if model.state == 'opened'
-      `<a onClick={this.onStateToggle} class="close"><i class="icon icon-ok"></i> Close</a>`
+      Control(label: 'Close', icon: 'ok', onClick: this.onStateToggle)
     else if model.state == 'closed'
-      `<a onClick={this.onStateToggle} class="close"><i class="icon icon-exclamation"></i> Reopen</a>`
+      Control(label: 'Close', icon: 'exclamation', onClick: this.onStateToggle)
 
   $controls: ->
     issueView = if this.state?.edit
-      [`<a onClick={this.onEditSave} class="edit"><i class="icon icon-ok"></i> Save</a>`,
-      `<a onClick={this.onEditCancel} class="remove"><i class="icon icon-remove"></i> Cancel</a>`]
+      [Control(label: 'Save', icon: 'ok', onClick: this.onEditSave),
+       Control(label: 'Cancel', icon: 'remove', onClick: this.onEditCancel)]
     else
       [this.$stateToggle(),
-      `<a onClick={this.onEditStart} class="edit"><i class="icon icon-pencil"></i> Edit</a>`,
-      `<a onClick={this.onRemove} class="remove"><i class="icon icon-trash"></i> Remove</a>`]
+       Control(label: 'Edit', icon: 'pencil', onClick: this.onEditStart),
+       Control(label: 'Remove', icon: 'trash', onClick: this.onRemove)]
 
   onStateToggle: ->
     model = this.getModel()

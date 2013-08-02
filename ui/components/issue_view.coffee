@@ -26,7 +26,7 @@ module.exports = core.createComponent
     if model.state == 'opened'
       Control(label: 'Close', icon: 'ok', onClick: this.onStateToggle)
     else if model.state == 'closed'
-      Control(label: 'Close', icon: 'exclamation', onClick: this.onStateToggle)
+      Control(label: 'Reopen', icon: 'exclamation', onClick: this.onStateToggle)
 
   $controls: ->
     issueView = if this.state?.edit

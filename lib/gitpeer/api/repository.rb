@@ -17,6 +17,10 @@ module GitPeer::API
     uri :history,       '/history/{ref}{?limit,after}'
     uri :path_history,  '/history/{ref}/{+path}{?limit,after}'
 
+    Contents = Struct.new(:path, :ref, :commit, :blob, :tree)
+    History = Struct.new(:ref, :limit, :after, :commits, :next_id, :prev_id)
+    Repository = Struct.new(:name, :description, :default_branch)
+
     get :repository do
       json repository
     end
@@ -44,11 +48,14 @@ module GitPeer::API
     get :history do
       ref_name = param :ref
       after = param :after
-      limit = param :limit, type: Integer, default: 30
+      limit = param :limit, type: Integer, default: 50
+
 
       ref = or_404 { ref_by_name(ref_name) }
       commits = walk_from(after || ref.target).take(limit).to_a
-      json History.new(ref_name, limit, after, commits)
+      next_id = commits.last.parents.first.oid if commits.last.parents.first
+      prev_id = prev_to_commit(ref_name, commits.first.oid, limit)
+      json History.new(ref_name, limit, after, commits, next_id, prev_id)
     end
 
     get :path_history
@@ -60,10 +67,6 @@ module GitPeer::API
         json obj
       end
     end
-
-    Contents = Struct.new(:path, :ref, :commit, :blob, :tree)
-    History = Struct.new(:ref, :limit, :after, :commits)
-    Repository = Struct.new(:name, :description, :default_branch)
 
     class TreeEntryRepresentation < Representation
       value :oid, as: :id
@@ -116,6 +119,22 @@ module GitPeer::API
           ref: represented.ref,
           limit: represented.limit,
           after: represented.after
+      end
+      link :next do
+        if represented.next_id
+          uri :history,
+            ref: represented.ref,
+            limit: represented.limit,
+            after: represented.next_id
+        end
+      end
+      link :prev do
+        if represented.prev_id
+          uri :history,
+            ref: represented.ref,
+            limit: represented.limit,
+            after: represented.prev_id
+        end
       end
     end
 
@@ -187,8 +206,17 @@ module GitPeer::API
         Repository.new(name, config[:description], config[:default_branch] || 'master')
       end
 
-      def git 
+      def self.git
         Rugged::Repository.new("#{config[:repo_path]}/.git")
+      end
+
+      def prev_to_commit(ref_name, sha, limit)
+        filename = "#{config[:repo_path]}/.git/logs/refs/heads/#{ref_name}"
+        commits = File.open(filename)
+          .map { |line| line.split(' ')[0..1] }
+          .drop_while { |shas| shas[0] != sha }
+        commits = commits[0..limit + 1]
+        commits.empty? ? nil : commits.last.last
       end
 
       def branch_by_name(name)

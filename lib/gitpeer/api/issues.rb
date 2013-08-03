@@ -11,6 +11,7 @@ module GitPeer::API
     include GitPeer::Controller::JSONRepresentation
 
     uri :issues,       '/{?state}'
+    uri :issues_tags,  '/tags'
     uri :issue,        '/{id}'
 
     Issue = Struct.new(:id, :name, :body, :state, :created, :updated, :tags)
@@ -38,6 +39,10 @@ module GitPeer::API
         issue_id
       end
       json(issue)
+    end
+
+    get :issues_tags do
+      json db[:issue_tags].group_and_count(:tag).to_hash(:tag, :count)
     end
 
     get :issue do

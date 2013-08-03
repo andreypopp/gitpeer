@@ -15,6 +15,7 @@ IssueItemView = core.createComponent
     model = this.getModel()
     href = "/issues/#{model.id}"
     `<a href={href} class="IssueItemView">
+      <span class="id">{model.id}</span>
       <span class="name">{model.name}</span>
       <Timestamp value={model.updated} relative />
      </a>`

@@ -19,7 +19,10 @@ IssueView = core.createComponent
   render: ->
     model = this.getModel()
     `<div class="Issue">
-      <h3>{model.name}</h3>
+      <h3>
+        <span class="id">{model.id}</span>
+        <span class="name">{model.name}</span>
+      </h3>
       <p>{model.body}</p>
       <TagSelector onChange={this.onTagsChange} model={model.tags} />
      </div>`

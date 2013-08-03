@@ -244,23 +244,15 @@ small()
       margin-right: 14px
       shadow-control()
 
-.IssueItemView
-  clearfix()
-  display: block
-  font-size: 90%
-  cursor: pointer
-  padding: 7px
-  &:hover
-    background: hlcolor
-  .name
-    float: left
-  time
-    font-size: 90%
-    float: right
-    color: dkcolor
-
 .IssueView
   position: relative
+
+  h3
+    .id
+      color: dkcolor
+      margin-right: 7px
+      &:before
+        content: '#'
 
   .Controls
     width: 150px
@@ -291,6 +283,26 @@ small()
         shadow-control()
         display: inline-block
         margin-right: 7px
+
+  .IssueItemView
+    clearfix()
+    display: block
+    font-size: 90%
+    cursor: pointer
+    padding: 7px
+    &:hover
+      background: hlcolor
+    .name, .id
+      float: left
+    .id
+      color: dkcolor
+      margin-right: 7px
+      &:before
+        content: '#'
+    time
+      font-size: 90%
+      float: right
+      color: dkcolor
 
 .HistoryView
 

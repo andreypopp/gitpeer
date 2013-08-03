@@ -10,13 +10,18 @@ Timestamp = require 'react-time'
 core = require './core'
 IssueEditor = require './issue_editor'
 Control = require './control'
+TagSelector = require './tag_selector'
 
 IssueView = core.createComponent
+  onTagsChange: (tags) ->
+    this.getModel().tags = tags
+
   render: ->
     model = this.getModel()
     `<div class="Issue">
       <h3>{model.name}</h3>
       <p>{model.body}</p>
+      <TagSelector onChange={this.onTagsChange} model={model.tags} />
      </div>`
 
 module.exports = core.createComponent

@@ -2760,7 +2760,7 @@
 		// override the item rendering method to add a "x" to each
 		this.settings.render.item = function(data) {
 			var label = data[self.settings.labelField];
-			return '<div class="item"><a href="#" class="remove" tabindex="-1" title="Remove"><i class="icon icon-remove"></i></a> ' +label + '</div>';
+			return '<div class="item"><a href="#" class="remove" tabindex="-1" title="Remove"><i class="icon icon-remove"></i></a>&nbsp;' +label + '</div>';
 		};
 	
 		// override the setup method to add an extra "click" handler

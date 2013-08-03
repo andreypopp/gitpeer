@@ -22,7 +22,8 @@ module.exports = core.createComponent
   values: ->
     name = this.refs.name.getDOMNode().value
     body = this.refs.body.getDOMNode().value
-    {name, body}
+    tags = this.refs.tags.getDOMNode().selectize.items
+    {name, body, tags}
 
   render: ->
     model = this.getModel()

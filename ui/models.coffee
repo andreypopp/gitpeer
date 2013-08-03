@@ -111,6 +111,7 @@ class exports.Issue extends Record
     created: Date
     updated: Date
     state: null
+    tags: null
 
 class exports.IssuesCollection extends Collection
   model: exports.Issue

@@ -2760,7 +2760,7 @@
 		// override the item rendering method to add a "x" to each
 		this.settings.render.item = function(data) {
 			var label = data[self.settings.labelField];
-			return '<div class="item">' + label + ' <a href="javascript:void(0)" class="remove" tabindex="-1" title="Remove">&times;</a></div>';
+			return '<div class="item"><a href="#" class="remove" tabindex="-1" title="Remove"><i class="icon icon-remove"></i></a> ' +label + '</div>';
 		};
 	
 		// override the setup method to add an extra "click" handler
@@ -2771,10 +2771,13 @@
 				original.apply(this, arguments);
 				this.$control.on('click', '.remove', function(e) {
 					e.preventDefault();
-					var $item = $(e.target).parent();
-					self.setActiveItem($item);
-					if (self.deleteSelection()) {
-						self.setCaret(self.items.length);
+					e.stopPropagation();
+					var $item = $(e.currentTarget).parent();
+					var value = $item.attr('data-value');
+					self.removeItem(value);
+					if (self.items.length == 0) {
+						self.showInput();
+						self.$control_input.blur();
 					}
 				});
 			};

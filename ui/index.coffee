@@ -63,8 +63,8 @@ App = core.createComponent
     this.props.router.on 'route:commit', (id) =>
       this.fetchAndShow new Commit(id: id)
 
-    this.props.router.on 'route:issues', (id) =>
-      this.fetchAndShow new Issues()
+    this.props.router.on 'route:issues', (params = {}) =>
+      this.fetchAndShow new Issues(state: params.state)
 
     this.props.router.on 'route:issue', (id) =>
       this.fetchAndShow new Issue(id: id)

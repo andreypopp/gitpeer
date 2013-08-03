@@ -14,13 +14,13 @@ module GitPeer::API
     uri :issue,        '/{id}'
 
     Issue = Struct.new(:id, :name, :body, :state, :created, :updated, :tags)
-    Issues = Struct.new(:issues, :stats)
+    Issues = Struct.new(:issues, :stats, :state)
 
     get :issues do
       state = param :state, default: 'opened'
       issues = db[:issues].where(:state => state).reverse(:updated).as(Issue)
       stats = db[:issues].group_and_count(:state).to_hash(:state, :count)
-      json Issues.new(issues, stats)
+      json Issues.new(issues, stats, state)
     end
 
     post :issues do
@@ -85,9 +85,13 @@ module GitPeer::API
 
     representation Issues do
       property :stats
+      property :state
       collection :issues, resolve: true
       link :self do
-        uri :issues
+        uri :issues, state: represented.state
+      end
+      link rel: :filtered, templated: true do
+        "#{uri :issues}{?state}"
       end
     end
 

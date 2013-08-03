@@ -117,7 +117,14 @@ class exports.IssuesCollection extends Collection
   model: exports.Issue
 
 class exports.Issues extends Record
-  url: "/api/issues"
+  url: ->
+    params = {}
+    params.state = this.state if this.state?
+    query = unless $.isEmptyObject(params) then "?#{$.param(params)}" else ''
+    url "/api/issues#{query}"
+
   @define
     issues: exports.IssuesCollection
+    state: null
     stats: null
+    _links: null

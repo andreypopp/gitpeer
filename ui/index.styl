@@ -232,6 +232,7 @@ small()
 
 .IssueEditor
   textarea
+    min-height: 8em
     resize: none
   form
     margin-bottom: 2em
@@ -271,6 +272,10 @@ small()
     i
       display: inline-block
       width: 1.5em
+
+.NewIssueView
+  .Controls
+    margin: 1em
 
 .IssuesView
   .meta
@@ -474,3 +479,131 @@ small()
     &:focus
       box-shadow: none
       border: none
+
+// BASIC AESTHETIC STYLES (common)
+
+.selectize-control
+  display: block
+  width: 100%
+  border: none
+  border-bottom: 1px solid darken(bg, 5%)
+  padding: (form-spacing / 2)
+
+  .option, .item, .create
+    font-size: 90%
+    color: dkcolor
+    a
+      color: dkcolor
+    &:hover, &.active
+      background: hlcolor
+      color: color
+    
+
+.selectize-input, .selectize-control.single .selectize-input.focus {
+  cursor: text;
+  width: 100%;
+}
+.selectize-input.dropdown-active::before {
+  content: ' ';
+  display: block;
+  position: absolute;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.selectize-control.multi .selectize-input > div {
+  cursor: pointer;
+  margin: 0 5px 5px 0;
+  padding: 1px 5px;
+}
+.selectize-input > div:last-child {
+  margin-right: 5px;
+}
+.selectize-input > input
+  display: inline-block
+  margin-right: 2px !important;
+
+.selectize-dropdown {
+  background: bg
+  margin-top: 15px;
+  border-top: 0 none;
+}
+.selectize-dropdown-content {
+  max-height: 200px;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+.selectize-dropdown [data-selectable],
+.selectize-dropdown .optgroup-header {
+  padding: 6px 9px;
+}
+.selectize-dropdown .optgroup:first-child .optgroup-header {
+  border-top: 0 none;
+}
+.selectize-dropdown, .selectize-input, .selectize-input input {
+  line-height: 20px;
+}
+
+.selectize-control.single .selectize-input::after {
+  content: ' ';
+  display: block;
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  margin-top: -2px;
+  width: 0;
+  height: 0;
+}
+
+.selectize-control.single .selectize-input.dropdown-active::after {
+  margin-top: -3px;
+}
+
+
+// LAYOUT STYLES (mandatory)
+
+.selectize-control
+  position: relative
+
+.selectize-input
+  overflow: hidden
+  position: relative
+  z-index: 1
+
+  &:after
+    content: ' '
+    display: block
+    clear: left
+
+  & > *
+    vertical-align: baseline
+    display: inline-block
+
+.selectize-input .item
+  display: inline
+
+.selectize-input > input
+  max-width: 100% !important
+  text-indent: 0 !important
+  border: 0 none !important
+  background: none !important
+  padding: 0 !important
+  margin: 0
+  &:focus
+    background: none !important
+    outline: none !important
+
+.selectize-dropdown {
+	position: absolute;
+	z-index: 2;
+}
+.selectize-dropdown [data-selectable] {
+	cursor: pointer;
+	overflow: hidden;
+}
+.selectize-input, .selectize-dropdown {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}

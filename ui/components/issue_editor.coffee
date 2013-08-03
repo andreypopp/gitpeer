@@ -16,8 +16,6 @@ module.exports = core.createComponent
   componentDidMount: ->
     $body = $(this.refs.body.getDOMNode())
     $body.autosize()
-    $tags = $(this.refs.tags.getDOMNode())
-    $tags.selectize(create: true, plugins: ['remove_button'])
 
   values: ->
     name: this.refs.name.getDOMNode().value

@@ -61,7 +61,7 @@ module.exports = core.createComponent
 
   render: ->
     model = this.getModel()
-    issueView = if not this.state?.edit
+    issueView = if this.state?.edit
       IssueEditor(model: model, ref: 'editor')
     else
       IssueView(model: model)

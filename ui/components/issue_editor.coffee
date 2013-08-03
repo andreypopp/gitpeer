@@ -27,5 +27,5 @@ module.exports = core.createComponent
     `<div class="IssueEditor">
       <input ref="name" class="name" placeholder="Issue name" type="text" value={model.name} />
       <textarea ref="body" class="body" placeholder="Describe issue">{model.body}</textarea>
-      <TagSelector ref="tags" model={model.tags} />
+      <TagSelector ref="tags" tagsURL="/api/issues/tags" model={model.tags} />
      </div>`

@@ -24,7 +24,7 @@ IssueView = core.createComponent
         <span class="name">{model.name}</span>
       </h3>
       <p>{model.body}</p>
-      <TagSelector onChange={this.onTagsChange} model={model.tags} />
+      <TagSelector onChange={this.onTagsChange} tagsURL="/api/issues/tags" model={model.tags} />
      </div>`
 
 module.exports = core.createComponent

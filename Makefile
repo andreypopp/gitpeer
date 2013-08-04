@@ -6,10 +6,10 @@ run:
 		-p '**/*.{rb,ru}' \
 		-- rackup -p $(PORT) --host $(HOST) -s thin
 
-shell:
+shell::
 	@bundle exec irb
 
-test:
+test specs::
 	@rspec specs/
 
 install:

@@ -1,24 +1,7 @@
-require 'json'
-require 'uri_template'
 require 'scorched'
 
 class GitPeer::Controller < Scorched::Controller
-  include Scorched::Options('uri_templates')
-
   config[:strip_trailing_slash] = :ignore
-
-  ##
-  # Generate URI out of the template
-  #
-  def uri(name, **vars)
-    template = if name.is_a? Symbol
-      construct_uri(name, **vars)
-    else
-      URITemplate.new(name).expand(vars)
-    end
-    raise ArgumentError, "unknown URI template #{name}" unless template
-    template
-  end
 
   ##
   # Shortcut for request.captures which normalizes some difference
@@ -115,41 +98,8 @@ class GitPeer::Controller < Scorched::Controller
           end
         end
 
-        self << {pattern: prefix, target: controller}
-      else
-        mount_rack prefix, controller
       end
-    end
-
-    def mount_rack(prefix, app = nil)
-      prefix = prefix + "/" unless prefix.end_with? '/'
-      unless app
-        app = prefix
-        prefix = nil
-      end
-      adapter = lambda do |env|
-        env = env.dup
-        env['PATH_INFO'] = env['PATH_INFO'][prefix.length..-1] if prefix
-        app.call(env)
-      end
-      self << {pattern: prefix ? prefix : compile('/**'), target: adapter}
-    end
-
-    ##
-    # Define named URI template for the controller
-    #
-    def uri(name, template)
-      template = URITemplate.new(template) unless template.is_a? URITemplate
-      uri_templates << { name => template }
-    end
-
-    def construct_uri(name, **vars)
-      template = uri_templates[name]
-      if template
-        "#{mounted_prefix || ''}#{template.expand(vars)}"
-      elsif parent
-        parent.construct_uri(name, **vars)
-      end
+      self << {pattern: prefix, target: controller}
     end
 
     def page(title: 'Unnamed Page',
@@ -177,16 +127,6 @@ class GitPeer::Controller < Scorched::Controller
       #{scripts}
       ".strip
     end
-
-    protected
-      def compile(pattern, match_to_end = false)
-        pattern = uri_templates[pattern] || pattern
-        if pattern.is_a? URITemplate then
-          pattern
-        else
-          super(pattern, match_to_end)
-        end
-      end
 
   end
 end

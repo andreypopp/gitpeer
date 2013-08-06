@@ -5,10 +5,12 @@ require 'sequel/extensions'
 require 'digest/sha1'
 require 'gitpeer/controller'
 require 'gitpeer/controller/json_representation'
+require 'gitpeer/controller/uri_templates'
 
 module GitPeer::API
   class Issues < GitPeer::Controller
     include GitPeer::Controller::JSONRepresentation
+    include GitPeer::Controller::URITemplates
 
     uri :issues,       '/{?state}'
     uri :issues_tags,  '/tags'

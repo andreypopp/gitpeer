@@ -98,6 +98,29 @@ describe GitPeer::Representation do
     repr2.to_hash.should == {a: 2}
   end
 
+  describe 'representing collections' do
+
+    it 'represents collections as arrays' do
+      A = Class.new(GitPeer::Representation) do
+        collection :a
+        collection :b
+      end
+      repr = A.new(OpenStruct.new(a: [1, 2], b: [1, 2].to_enum))
+      repr.to_hash.should == {a: [1, 2], b: [1, 2]}
+    end
+
+    it 'allows to represent elements in arrays with custom representers' do
+      EA = Class.new(GitPeer::Representation) do
+        prop :a, from: :b
+      end
+      A = Class.new(GitPeer::Representation) do
+        collection :a, repr: EA
+      end
+      repr = A.new(OpenStruct.new(a: [OpenStruct.new(b: 2)]))
+      repr.to_hash.should == {a: [{a: 2}]}
+    end
+  end
+
   describe 'representation error' do
 
     it 'fails if represented obj cannot respond to needed methods' do

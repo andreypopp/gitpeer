@@ -21,9 +21,48 @@ class GitPeer::Representation
 
     props.each do |prop|
       name = prop[:name].to_sym
-
       next if props_seen.include? name
       props_seen << name
+      result[name] = represent_prop(name, prop)
+    end
+
+    unless links.empty?
+      result_links = {}
+      links.each do |link|
+        name = link[:name]
+
+        next if links_seen.include? name
+        links_seen << name
+
+        href = represent_link(name, link)
+
+        result_links[name] = link
+          .reject { |k, v| [:proc, :name].include? k }
+          .merge(href: href)
+      end
+      result[:_links] = result_links
+    end
+
+    result
+  end
+
+  def to_json
+    to_hash.to_json
+  end
+
+  protected
+    def represent_link(name, link)
+      if link[:proc]
+        instance_eval &link[:proc]
+      elsif link[:href]
+        link[:href]
+      else
+        raise RepresentationError.new("cannot generate link #{name} for #{obj}")
+      end
+    end
+
+    def represent_prop(name, prop)
+      is_collection = prop[:collection]
 
       value = if prop[:proc]
         instance_eval &prop[:proc]
@@ -39,38 +78,16 @@ class GitPeer::Representation
         raise RepresentationError.new("#{@obj} doesn't provide #{name} reader")
       end
 
-      value = prop[:repr].new(value, **@context).to_hash if prop[:repr]
-
-      result[name] = value
-    end
-
-    unless links.empty?
-      result_links = {}
-      links.each do |link|
-        name = link[:name]
-
-        next if links_seen.include? name
-        links_seen << name
-
-        value = if link[:proc]
-          instance_eval &link[:proc]
-        elsif link[:href]
-          link[:href]
+      value = value.to_a if is_collection
+      if prop[:repr]
+        if is_collection
+          value = value.map { |e| prop[:repr].new(e, **@context).to_hash }
         else
-          raise RepresentationError.new("cannot generate link #{name} for #{obj}")
+          value = prop[:repr].new(value, **@context).to_hash
         end
-
-        result_links[name] = link.reject { |k, v| [:proc, :name].include? k }
       end
-      result[:_links] = result_links
+      value
     end
-
-    result
-  end
-
-  def to_json
-    to_hash.to_json
-  end
 
   class << self
     attr_reader :props, :links
@@ -80,6 +97,10 @@ class GitPeer::Representation
         @props = []
         @links = []
       end
+    end
+
+    def collection(name, **options)
+      self.prop(name, **options.merge(collection: true))
     end
 
     def prop(name, **options, &block)
@@ -109,7 +130,7 @@ class GitPeer::Representation
     end
 
     def for_struct(cls)
-      Class.create(self) do
+      Class.new(self) do
         cls.members.each do |m|
           prop m
         end

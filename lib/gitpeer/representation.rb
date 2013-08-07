@@ -1,5 +1,6 @@
 require 'set'
 require 'json'
+require 'uri_template'
 
 class GitPeer::Representation
 
@@ -34,10 +35,10 @@ class GitPeer::Representation
         next if links_seen.include? name
         links_seen << name
 
-        href = represent_link(name, link)
+        href = represent_link(name, link, result.dup)
 
         result_links[name] = link
-          .reject { |k, v| [:proc, :name].include? k }
+          .reject { |k, v| [:proc, :name, :template].include? k }
           .merge(href: href)
       end
       result[:_links] = result_links
@@ -51,13 +52,22 @@ class GitPeer::Representation
   end
 
   protected
-    def represent_link(name, link)
-      if link[:proc]
+    def represent_link(name, link, props)
+      value = if link[:proc]
         instance_eval &link[:proc]
+      elsif link[:template]
+        template = link[:template]
+        (template.is_a? URITemplate) ? template : URITemplate.new(template)
       elsif link[:href]
         link[:href]
       else
         raise RepresentationError.new("cannot generate link #{name} for #{obj}")
+      end
+
+      if value.is_a? URITemplate and not link[:templated]
+        value = value.expand(props)
+      else
+        value
       end
     end
 

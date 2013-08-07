@@ -106,6 +106,26 @@ describe GitPeer::Representation do
     repr2.to_hash.should == {a: 2}
   end
 
+  describe 'representing links with URI templates' do
+
+    it 'allows representing templated links with URI templates' do
+      repr_class = Class.new(GitPeer::Representation) do
+        link :self, template: '/{x}', templated: true
+      end
+      repr = repr_class.new(OpenStruct.new(x: 1))
+      repr.to_hash.should == {_links: {self: {href: '/{x}', templated: true}}}
+    end
+
+    it 'expands URI template if link is not meant to be templated' do
+      repr_class = Class.new(GitPeer::Representation) do
+        prop :x
+        link :self, template: '/{x}'
+      end
+      repr = repr_class.new(OpenStruct.new(x: 1))
+      repr.to_hash.should == {x: 1, _links: {self: {href: '/1'}}}
+    end
+  end
+
   describe 'representing collections' do
 
     it 'represents collections as arrays' do

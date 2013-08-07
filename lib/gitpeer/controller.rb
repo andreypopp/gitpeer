@@ -3,7 +3,12 @@ require 'gitpeer/application'
 require 'gitpeer/context'
 
 class GitPeer::Controller < Scorched::Controller
+  require 'gitpeer/controller/uri_templates'
+  require 'gitpeer/controller/json_representation'
+
   include GitPeer::Context::Configurable
+  include GitPeer::Controller::URITemplates
+  include GitPeer::Controller::JSONRepresentation
 
   config[:strip_trailing_slash] = :ignore
 

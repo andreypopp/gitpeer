@@ -3,16 +3,11 @@ require 'omniauth'
 require 'omniauth-github'
 require 'gitpeer'
 require 'gitpeer/application'
-require 'gitpeer/controller/uri_templates'
-require 'gitpeer/controller/json_representation'
 require 'gitpeer/auth'
 require 'gitpeer/repository'
 require 'gitpeer/issues'
 
 class App < GitPeer::Application
-  include GitPeer::Controller::URITemplates
-  include GitPeer::Controller::JSONRepresentation
-
   uri :page_root,          '/'
   uri :page_contents,      '/contents/{ref}{+path}'
   uri :page_history,       '/history/{ref}{?limit,after}'

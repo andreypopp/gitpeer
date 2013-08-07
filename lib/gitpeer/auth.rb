@@ -1,9 +1,6 @@
 require 'gitpeer/controller'
-require 'gitpeer/controller/uri_templates'
 
 class GitPeer::Auth < GitPeer::Controller
-  include GitPeer::Controller::URITemplates
-
   uri :logout,          '/logout'
   uri :login,           '/{provider}'
   uri :login_callback,  '/{provider}/callback'

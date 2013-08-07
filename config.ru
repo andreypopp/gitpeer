@@ -6,8 +6,8 @@ require 'gitpeer'
 require 'gitpeer/application'
 require 'gitpeer/controller/uri_templates'
 require 'gitpeer/auth'
-require 'gitpeer/api/repository'
-require 'gitpeer/api/issues'
+require 'gitpeer/repository'
+require 'gitpeer/issues'
 
 class App < GitPeer::Application
   include GitPeer::Controller::URITemplates
@@ -29,12 +29,12 @@ class App < GitPeer::Application
       'fd0a74f0b3fa2f2722b8ba0dae191dcb29be8c7b'
   end
 
-  issues = GitPeer::API::Issues.configure(db: db) do
-    extend_representation GitPeer::API::Issues::Issue do
+  issues = GitPeer::Issues.configure(db: db) do
+    extend_representation GitPeer::Issues::Issue do
       link :self_html, template: uri(:page_issue)
     end
  
-    extend_representation GitPeer::API::Issues::Issues do
+    extend_representation GitPeer::Issues::Issues do
       link :self_html, template: uri(:page_issues)
       link :filtered_html, templated: true do
         "#{uri :page_issues}{?state}"
@@ -42,7 +42,7 @@ class App < GitPeer::Application
     end
   end
 
-  git = GitPeer::API::Repository.configure(repo_path: '.') do
+  git = GitPeer::Repository.configure(repo_path: '.') do
 
     extend_representation Rugged::Commit, name: :basic do
       link :self_html, template: uri(:page_commit)
@@ -62,14 +62,14 @@ class App < GitPeer::Application
       link :self_html, template: uri(:page_blob)
     end
 
-    extend_representation GitPeer::API::Repository::Contents do
+    extend_representation GitPeer::Repository::Contents do
       link :self_html, template: uri(:page_contents)
       link :entry_contents_html, templated: true do
         "#{uri(:page_contents, ref: obj.ref, path: obj.path)}/{+path}"
       end
     end
 
-    extend_representation GitPeer::API::Repository::History do
+    extend_representation GitPeer::Repository::History do
       link :self_html, template: uri(:page_history)
       link :next_html do
         uri(:page_history, ref: obj.ref, limit: obj.limit, after: obj.next_id) if obj.next_id
@@ -79,7 +79,7 @@ class App < GitPeer::Application
       end
     end
 
-    extend_representation GitPeer::API::Repository::Repository do
+    extend_representation GitPeer::Repository::Repository do
       link :self_html,      template: uri(:page_root)
       link :contents_html,  template: uri(:page_contents)
       link :history_html,   template: uri(:page_history)

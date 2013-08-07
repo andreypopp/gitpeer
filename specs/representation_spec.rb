@@ -51,9 +51,7 @@ describe GitPeer::Representation do
 
   it 'allows computed props' do
     class MyRepr < GitPeer::Representation
-      prop :c do
-        @obj.a + @obj.b
-      end
+      prop :c, from: proc { @obj.a + @obj.b }
     end
 
     repr = MyRepr.new(OpenStruct.new(a: 1, b: 2))
@@ -62,9 +60,7 @@ describe GitPeer::Representation do
 
   it 'allows representations to depend on context' do
     class ContextualRepr < GitPeer::Representation
-      prop :c do
-        @context[:b] + @obj.a
-      end
+      prop :c, from: proc { @context[:b] + @obj.a }
     end
 
     repr = ContextualRepr.new(OpenStruct.new(a: 1), b: 2)
@@ -72,15 +68,27 @@ describe GitPeer::Representation do
   end
 
   it 'allows define props with their own representations' do
-    class BRepr < GitPeer::Representation
+    brepr = Class.new(GitPeer::Representation) do
       prop :c
     end
-    class ARepr < GitPeer::Representation
+    arepr = Class.new(GitPeer::Representation) do
       prop :a
-      prop :b, repr: BRepr
+      prop :b, repr: brepr
     end
 
-    repr = ARepr.new(OpenStruct.new(a: 1, b: OpenStruct.new(c: 2)))
+    repr = arepr.new(OpenStruct.new(a: 1, b: OpenStruct.new(c: 2)))
+    repr.to_hash.should == {a: 1, b: {c: 2}}
+  end
+  
+  it 'allows define props with inline representations' do
+    arepr = Class.new(GitPeer::Representation) do
+      prop :a
+      prop :b do
+        prop :c
+      end
+    end
+
+    repr = arepr.new(OpenStruct.new(a: 1, b: OpenStruct.new(c: 2)))
     repr.to_hash.should == {a: 1, b: {c: 2}}
   end
 
@@ -101,22 +109,32 @@ describe GitPeer::Representation do
   describe 'representing collections' do
 
     it 'represents collections as arrays' do
-      A = Class.new(GitPeer::Representation) do
+      a = Class.new(GitPeer::Representation) do
         collection :a
         collection :b
       end
-      repr = A.new(OpenStruct.new(a: [1, 2], b: [1, 2].to_enum))
+      repr = a.new(OpenStruct.new(a: [1, 2], b: [1, 2].to_enum))
       repr.to_hash.should == {a: [1, 2], b: [1, 2]}
     end
 
-    it 'allows to represent elements in arrays with custom representers' do
-      EA = Class.new(GitPeer::Representation) do
+    it 'allows to represent elements in collection with custom representer' do
+      ea = Class.new(GitPeer::Representation) do
         prop :a, from: :b
       end
-      A = Class.new(GitPeer::Representation) do
-        collection :a, repr: EA
+      a = Class.new(GitPeer::Representation) do
+        collection :a, repr: ea
       end
-      repr = A.new(OpenStruct.new(a: [OpenStruct.new(b: 2)]))
+      repr = a.new(OpenStruct.new(a: [OpenStruct.new(b: 2)]))
+      repr.to_hash.should == {a: [{a: 2}]}
+    end
+
+    it 'allows to represent elements in collection with inline representer' do
+      a = Class.new(GitPeer::Representation) do
+        collection :a do
+          prop :a, from: :b
+        end
+      end
+      repr = a.new(OpenStruct.new(a: [OpenStruct.new(b: 2)]))
       repr.to_hash.should == {a: [{a: 2}]}
     end
   end

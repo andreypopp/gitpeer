@@ -64,10 +64,10 @@ class GitPeer::Representation
     def represent_prop(name, prop)
       is_collection = prop[:collection]
 
-      value = if prop[:proc]
-        instance_eval &prop[:proc]
-      elsif prop[:from]
-        if @obj.respond_to? prop[:from]
+      value = if prop[:from]
+        if Proc === prop[:from]
+          instance_eval &prop[:from]
+        elsif @obj.respond_to? prop[:from]
           @obj.send prop[:from]
         else
           raise RepresentationError.new("#{@obj} doesn't provide #{name} reader")
@@ -99,12 +99,13 @@ class GitPeer::Representation
       end
     end
 
-    def collection(name, **options)
-      self.prop(name, **options.merge(collection: true))
+    def collection(name, **options, &block)
+      self.prop(name, **options.merge(collection: true), &block)
     end
 
     def prop(name, **options, &block)
-      self.props << options.merge(name: name, proc: block)
+      options[:repr] = Class.new(GitPeer::Representation, &block) if block_given?
+      self.props << options.merge(name: name)
     end
 
     def link(name, **options, &block)

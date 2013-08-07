@@ -7,27 +7,28 @@ require 'gitpeer/context'
 class GitPeer::Application < GitPeer::Controller
   include GitPeer::Context
 
-  class << self
+  def page(title: 'Unnamed Page',
+            scripts: [],
+            stylesheets: [],
+            data: nil)
+    response['Content-Type'] = 'text/html'
+    stylesheets = stylesheets
+      .map { |href| "<link rel='stylesheet' href='#{href}' />" }
+    scripts = scripts
+      .map { |href| "<script src='#{href}'></script>" }
 
-    def page(title: 'Unnamed Page',
-              scripts: [],
-              stylesheets: [],
-              data: nil)
-      stylesheets = stylesheets
-        .map { |href| "<link rel='stylesheet' href='#{href}' />" }
-      scripts = scripts
-        .map { |href| "<script src='#{href}'></script>" }
-
-      if data
-        data = data.to_json unless data.is_a? String
-        scripts << "<script>var __data = #{data};</script>"
-      end
-
-      "<!doctype>
-       <title>#{title}</title>
-       #{stylesheets.join}
-       #{scripts.join}"
+    if data
+      data = data.to_json unless data.is_a? String
+      scripts << "<script>var __data = #{data};</script>"
     end
+
+    "<!doctype>
+      <title>#{title}</title>
+      #{stylesheets.join}
+      #{scripts.join}"
+  end
+
+  class << self
 
     def all_representations
       @all_representations ||= GitPeer::Registry.new()

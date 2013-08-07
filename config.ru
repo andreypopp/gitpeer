@@ -23,8 +23,6 @@ class App < GitPeer::Application
 
   db = Sequel.connect('sqlite://.git/gitpeer.db')
 
-  assets = Rack::File.new('ui/assets')
-
   auth = GitPeer::Auth.configure do
     provider :github,
       '0db74a96913fc2b5fb54',
@@ -91,9 +89,9 @@ class App < GitPeer::Application
   mount '/api/issues',  issues
   mount '/api',         git
   mount '/auth',        auth
-  mount '/a',           assets
+  mount '/a',           Rack::File.new('ui/assets')
 
-  get '/**' do
+  get uri_templates.keys do
     page(
       title: git.repository.name,
       stylesheets: ['/a/index.css'],

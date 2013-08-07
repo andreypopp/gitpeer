@@ -14,7 +14,7 @@ module GitPeer::Controller::URITemplates
     raise ArgumentError, "unknown URI template #{name}" unless template
     template
   end
-  
+
   def self.included(controller)
     controller.extend(ClassMethods)
     controller.class_eval do
@@ -27,6 +27,15 @@ module GitPeer::Controller::URITemplates
     def uri(name, template)
       template = URITemplate.new(template) unless template.is_a? URITemplate
       uri_templates << { name => template }
+    end
+
+    def uri_template(name)
+      template = uri_templates[name]
+      if not template and parent.respond_to? :uri_template
+        template = parent.uri_template(name)
+      else
+        URITemplate.new("#{mounted_prefix || ''}#{template}")
+      end
     end
 
     def construct_uri(name, **vars)

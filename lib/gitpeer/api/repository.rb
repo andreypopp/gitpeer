@@ -21,7 +21,7 @@ module GitPeer::API
 
     Contents = Struct.new(:path, :ref, :commit, :blob, :tree)
     History = Struct.new(:ref, :limit, :after, :commits, :next_id, :prev_id)
-    Repository = Struct.new(:name, :description, :default_branch)
+    Repository = Struct.new(:name, :description, :ref)
 
     get :repository do
       json repository
@@ -70,142 +70,118 @@ module GitPeer::API
       end
     end
 
-    class TreeEntryRepresentation < Representation
-      value :oid, as: :id
-      value :type
-      value :name
-      link :self do uri represented[:type], id: represented[:oid] end
-    end
-
     representation Repository do
-      property :name
-      property :description
-      property :default_branch
-
-      link :self do
-        uri :repository
-      end
-      link :history do
-        uri :history, ref: represented.default_branch
-      end
-      link :contents do
-        uri :contents, ref: represented.default_branch
-      end
-    end
-
-    representation Contents do
-      property :path
-      property :ref
-      property :commit, resolve: true, name: :basic
-      property :blob, resolve: true
-      property :tree, resolve: true
-      link :self do
-        uri :contents,
-          ref: represented.ref,
-          path: represented.path
-      end
-      # XXX: It would be nice to have URITemplate#partial_expand instead
-      link :rel => :entry_contents, :templated => true do
-        prefix = uri :contents, ref: represented.ref
-        "#{prefix}{+path}"
-      end
-    end
-
-    representation History do
-      property :ref
-      property :limit
-      property :after
-      collection :commits, resolve: true, name: :basic
-      link :self do
-        uri :history,
-          ref: represented.ref,
-          limit: represented.limit,
-          after: represented.after
-      end
-      link :next do
-        if represented.next_id
-          uri :history,
-            ref: represented.ref,
-            limit: represented.limit,
-            after: represented.next_id
-        end
-      end
-      link :prev do
-        if represented.prev_id
-          uri :history,
-            ref: represented.ref,
-            limit: represented.limit,
-            after: represented.prev_id
-        end
-      end
+      prop :name
+      prop :description
+      prop :ref
+      link :self,     template: uri(:repository)
+      link :history,  template: uri(:history)
+      link :contents, template: uri(:contents)
     end
 
     class BasicCommitRepresentation < Representation
-      property :oid, as: :id
-      property :message
-      property :author
-      property :committer
-      property :tree_id
-      link :self do uri :commit, id: represented.oid end
-      link :tree do uri :tree, id: represented.tree_id end
-      link :contents do uri :contents, ref: represented.tree_id end
+      prop :id, from: :oid
+      prop :message
+      prop :author
+      prop :committer
+      prop :tree_id
+      link :self,     template: uri(:commit)
+      link :tree,     template: uri(:tree)
+      link :contents, template: uri(:contents)
     end
 
     class CommitRepresentation < BasicCommitRepresentation
-      collection :diff, getter: lambda { |o, *| diff(reverse: true).to_a }, resolve: true
+      collection :diff,
+        from: proc { obj.diff(reverse: true) },
+        repr: Rugged::Diff::Patch
     end
 
     representation Rugged::Commit, CommitRepresentation
     representation Rugged::Commit, BasicCommitRepresentation, name: :basic
 
+    representation Contents do
+      prop :path
+      prop :ref
+      prop :commit, repr: Rugged::Commit, repr_name: :basic
+      prop :blob, repr: Rugged::Blob
+      prop :tree, repr: Rugged::Tree
+      link :self, template: uri(:contents)
+      link :entry_contents, templated: true do
+        "#{uri(:contents, ref: obj.ref, path: obj.path)}/{+path}"
+      end
+    end
+
+    representation History do
+      prop :ref
+      prop :limit
+      prop :after
+      collection :commits, repr: Rugged::Commit, repr_name: :basic
+      link :self do
+        uri :history, ref: obj.ref, limit: obj.limit, after: obj.after
+      end
+      link :next do
+        uri :history, ref: obj.ref, limit: obj.limit, after: obj.next_id if obj.next_id
+      end
+      link :prev do
+        uri :history, ref: obj.ref, limit: obj.limit, after: obj.prev_id if obj.prev_id
+      end
+    end
+
     representation Rugged::Blob do
-      property :oid, as: :id
-      property :content
-      link :self do uri :blob, id: represented.oid end
+      prop :id, from: :oid
+      prop :content
+      link :self, template: uri(:blob)
     end
 
     representation Rugged::Tree do
-      property :oid, as: :id
-      collection :entries, decorator: TreeEntryRepresentation
-      link :self do uri :tree, id: represented.oid end
+      prop :id, from: :oid
+      collection :entries do
+        value :id, from: :oid
+        value :type
+        value :name
+        link :self do
+          uri obj[:type], id: obj[:oid]
+        end
+      end
+      link :self, template: uri(:tree)
     end
 
     representation Rugged::Diff::Patch do
-      property :delta, resolve: true
-      property :size
-      property :additions
-      property :deletions
-      property :deletions
-      collection :hunks, resolve: true
+      prop :delta, repr: Rugged::Diff::Delta
+      prop :size
+      prop :additions
+      prop :deletions
+      prop :deletions
+      collection :hunks, repr: Rugged::Diff::Hunk
     end
 
     representation Rugged::Diff::Delta do
-      property :old_file
-      property :new_file
-      property :similarity
-      property :status
-      property :binary
+      prop :old_file
+      prop :new_file
+      prop :similarity
+      prop :status
+      prop :binary
     end
 
     representation Rugged::Diff::Hunk do
-      property :size
-      property :header
-      property :range
-      collection :lines, resolve: true
+      prop :size
+      prop :header
+      prop :range
+      collection :lines, repr: Rugged::Diff::Line
     end
 
     representation Rugged::Diff::Line do
-      property :line_origin
-      property :content
-      property :old_lineno
-      property :new_lineno
+      prop :line_origin
+      prop :content
+      prop :old_lineno
+      prop :new_lineno
     end
 
     protected
 
       def self.repository
         name = File.basename File.absolute_path config[:repo_path]
-        Repository.new(name, config[:description], config[:default_branch] || 'master')
+        Repository.new(name, config[:description], config[:ref] || 'master')
       end
 
       def self.git

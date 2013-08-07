@@ -3,13 +3,13 @@ require 'scorched'
 require 'omniauth'
 require 'omniauth-github'
 require 'gitpeer'
-require 'gitpeer/controller'
+require 'gitpeer/application'
 require 'gitpeer/controller/uri_templates'
 require 'gitpeer/auth'
 require 'gitpeer/api/repository'
 require 'gitpeer/api/issues'
 
-class App < GitPeer::Controller
+class App < GitPeer::Application
   include GitPeer::Controller::URITemplates
 
   uri :page_root,          '/'
@@ -33,83 +33,58 @@ class App < GitPeer::Controller
 
   issues = GitPeer::API::Issues.configure(db: db) do
     extend_representation GitPeer::API::Issues::Issue do
-      link :self_html do uri :page_issue, id: represented.id end
+      link :self_html, template: uri(:page_issue)
     end
-
+ 
     extend_representation GitPeer::API::Issues::Issues do
-      link :self_html do uri :page_issues end
-      link :filtered_html do "#{uri :page_issues}{?state}" end
+      link :self_html, template: uri(:page_issues)
+      link :filtered_html do
+        "#{uri :page_issues}{?state}"
+      end
     end
   end
 
   git = GitPeer::API::Repository.configure(repo_path: '.') do
 
     extend_representation Rugged::Commit, name: :basic do
-      link :self_html do uri :page_commit, id: represented.oid end
+      link :self_html, template: uri(:page_commit)
       link :contents_html do
-        uri :page_contents, ref: represented.tree_id
+        uri :page_contents, ref: obj.tree_id
       end
     end
 
     extend_representation Rugged::Commit do
-      link :self_html do uri :page_commit, id: represented.oid end
+      link :self_html, template: uri(:page_commit)
       link :contents_html do
-        uri :page_contents, ref: represented.tree_id
+        uri :page_contents, ref: obj.tree_id
       end
     end
 
     extend_representation Rugged::Blob do
-      link :self_html do uri :page_blob, id: represented.oid end
+      link :self_html, template: uri(:page_blob)
     end
 
     extend_representation GitPeer::API::Repository::Contents do
-      link :self_html do
-        uri :page_contents,
-          ref: represented.ref,
-          path: represented.path
-      end
-      # XXX: It would be nice to have URITemplate#partial_expand instead
-      link :rel => :entry_contents_html, :templated => true do
-        prefix = uri :page_contents, ref: represented.ref, path: represented.path
-        "#{prefix}/{+path}"
+      link :self_html, template: uri(:page_contents)
+      link :entry_contents_html, templated: true do
+        "#{uri(:page_contents, ref: obj.ref, path: obj.path)}/{+path}"
       end
     end
 
     extend_representation GitPeer::API::Repository::History do
-      link :self_html do
-        uri :page_history,
-          ref: represented.ref,
-          limit: represented.limit,
-          after: represented.after
-      end
+      link :self_html, template: uri(:page_history)
       link :next_html do
-        if represented.next_id
-          uri :page_history,
-            ref: represented.ref,
-            limit: represented.limit,
-            after: represented.next_id
-        end
+        uri(:page_history, ref: obj.ref, limit: obj.limit, after: obj.next_id) if obj.next_id
       end
       link :prev_html do
-        if represented.prev_id
-          uri :page_history,
-            ref: represented.ref,
-            limit: represented.limit,
-            after: represented.prev_id
-        end
+        uri(:page_history, ref: obj.ref, limit: obj.limit, after: obj.prev_id) if obj.prev_id
       end
     end
 
     extend_representation GitPeer::API::Repository::Repository do
-      link :self_html do
-        uri :page_root, ref: represented.default_branch
-      end
-      link :contents_html do
-        uri :page_contents, ref: represented.default_branch
-      end
-      link :history_html do
-        uri :page_history,  ref: represented.default_branch
-      end
+      link :self_html,      template: uri(:page_root)
+      link :contents_html,  template: uri(:page_contents)
+      link :history_html,   template: uri(:page_history)
     end
   end
 

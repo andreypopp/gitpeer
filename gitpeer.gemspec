@@ -18,7 +18,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "scorched", ">= 0.16"
   spec.add_dependency "uri_template", "~> 0.5"
-  spec.add_dependency "roar", "~> 0.11"
   spec.add_dependency "rugged", "~> 0.19"
   spec.add_dependency "omniauth", "~> 1.1.4"
   spec.add_dependency "omniauth-github", "~> 1.1.1"

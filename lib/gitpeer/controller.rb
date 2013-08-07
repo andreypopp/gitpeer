@@ -1,4 +1,5 @@
 require 'scorched'
+require 'gitpeer/application'
 
 class GitPeer::Controller < Scorched::Controller
   config[:strip_trailing_slash] = :ignore
@@ -57,6 +58,16 @@ class GitPeer::Controller < Scorched::Controller
 
     def configured; end
 
+    def app
+      @app ||= begin
+        current = self
+        until current == Scorched::Controller or current < GitPeer::Application
+          current = self.parent
+        end
+        current < GitPeer::Application ? current : nil
+      end
+    end
+
     ##
     # Configure controller with class methods or by passing a block
     #
@@ -89,44 +100,9 @@ class GitPeer::Controller < Scorched::Controller
         controller.config[:auto_pass] = true
         controller.mounted(self) if controller.respond_to? :mounted
         controller.parent = self if controller.respond_to? :parent=
-        controller.mounted_prefix = prefix if controller.respond_to? :mounted_prefix
-
-        if controller.respond_to? :uri_templates
-          controller.uri_templates.each_pair do |name, template|
-            template = URITemplate.new(prefix + template.pattern)
-            uri_templates[name] = template
-          end
-        end
-
+        controller.mounted_prefix = prefix if controller.respond_to? :mounted_prefix=
       end
       self << {pattern: prefix, target: controller}
     end
-
-    def page(title: 'Unnamed Page',
-             scripts: [],
-             stylesheets: [],
-             data: nil)
-      stylesheets = stylesheets
-        .map { |href| "<link rel='stylesheet' href='#{href}' />" }
-        .join
-      scripts = scripts
-        .map { |href| "<script src='#{href}'></script>" }
-        .join
-
-      if data
-        scripts << "
-          <script>
-            var __data = #{json(data)};
-          </script>"
-      end
-
-      "
-      <!doctype>
-      <title>#{title}</title>
-      #{stylesheets}
-      #{scripts}
-      ".strip
-    end
-
   end
 end

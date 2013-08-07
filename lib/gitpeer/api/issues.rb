@@ -68,14 +68,13 @@ module GitPeer::API
       json issue
     end
 
-    # XXX: Add link/unlink method to Scorched
-    route :issue, method: ['LINK'] do
+    link :issue do
       id = captures[:id]
       tag = param :tag
       db[:issue_tags].insert(issue_id: id, tag: tag)
     end
 
-    route :issue, method: ['UNLINK'] do
+    unlink :issue do
       id = captures[:id]
       tag = param :tag
       db[:issue_tags].where(issue_id: id, tag: tag).delete
@@ -91,28 +90,24 @@ module GitPeer::API
     end
 
     representation Issues do
-      property :stats
-      property :state
-      collection :issues, resolve: true
-      link :self do
-        uri :issues, state: represented.state
-      end
+      prop :stats
+      prop :state
+      collection :issues, repr: Issue
+      link :self, template: uri(:issues)
       link rel: :filtered, templated: true do
         "#{uri :issues}{?state}"
       end
     end
 
     representation Issue do
-      property :id
-      property :name
-      property :body
-      property :state
-      property :created
-      property :updated
-      property :tags
-      link :self do
-        uri :issue, id: represented.id
-      end
+      prop :id
+      prop :name
+      prop :body
+      prop :state
+      prop :created
+      prop :updated
+      prop :tags
+      link :self, template: uri(:issue)
     end
 
     def self.db

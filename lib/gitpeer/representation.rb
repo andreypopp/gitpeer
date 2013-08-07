@@ -137,8 +137,9 @@ class GitPeer::Representation
       chain
     end
 
-    def for_struct(cls)
+    def for_struct(cls, &block)
       Class.new(self) do
+        class_eval(&block) if block_given?
         cls.members.each do |m|
           prop m
         end

@@ -2,7 +2,7 @@ require 'gitpeer/controller'
 
 class GitPeer::Application < GitPeer::Controller
 
-  def page(title: 'Unnamed Page',
+  def self.page(title: 'Unnamed Page',
             scripts: [],
             stylesheets: [],
             data: nil)
@@ -14,9 +14,10 @@ class GitPeer::Application < GitPeer::Controller
       .join
 
     if data
+      data = data.to_json unless data.is_a? String
       scripts << "
         <script>
-          var __data = #{json(data)};
+          var __data = #{data};
         </script>"
     end
 

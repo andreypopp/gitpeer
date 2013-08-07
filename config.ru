@@ -30,11 +30,11 @@ class App < GitPeer::Application
   end
 
   issues = GitPeer::Issues.configure(db: db) do
-    extend_representation GitPeer::Issues::Issue do
+    representation GitPeer::Issues::Issue, extend: true do
       link :self_html, template: uri(:page_issue)
     end
  
-    extend_representation GitPeer::Issues::Issues do
+    representation GitPeer::Issues::Issues, extend: true do
       link :self_html, template: uri(:page_issues)
       link :filtered_html, templated: true do
         "#{uri :page_issues}{?state}"
@@ -44,32 +44,32 @@ class App < GitPeer::Application
 
   git = GitPeer::Repository.configure(repo_path: '.') do
 
-    extend_representation Rugged::Commit, name: :basic do
+    representation Rugged::Commit, name: :basic, extend: true do
       link :self_html, template: uri(:page_commit)
       link :contents_html do
         uri :page_contents, ref: obj.tree_id
       end
     end
 
-    extend_representation Rugged::Commit do
+    representation Rugged::Commit, extend: true do
       link :self_html, template: uri(:page_commit)
       link :contents_html do
         uri :page_contents, ref: obj.tree_id
       end
     end
 
-    extend_representation Rugged::Blob do
+    representation Rugged::Blob, extend: true do
       link :self_html, template: uri(:page_blob)
     end
 
-    extend_representation GitPeer::Repository::Contents do
+    representation GitPeer::Repository::Contents, extend: true do
       link :self_html, template: uri(:page_contents)
       link :entry_contents_html, templated: true do
         "#{uri(:page_contents, ref: obj.ref, path: obj.path)}/{+path}"
       end
     end
 
-    extend_representation GitPeer::Repository::History do
+    representation GitPeer::Repository::History, extend: true do
       link :self_html, template: uri(:page_history)
       link :next_html do
         uri(:page_history, ref: obj.ref, limit: obj.limit, after: obj.next_id) if obj.next_id
@@ -79,7 +79,7 @@ class App < GitPeer::Application
       end
     end
 
-    extend_representation GitPeer::Repository::Repository do
+    representation GitPeer::Repository::Repository, extend: true do
       link :self_html,      template: uri(:page_root)
       link :contents_html,  template: uri(:page_contents)
       link :history_html,   template: uri(:page_history)
@@ -91,13 +91,16 @@ class App < GitPeer::Application
   mount '/auth',        auth
   mount '/a',           Rack::File.new('ui/assets')
 
-  get uri_templates.keys do
+  get uris.keys do
     page(
       title: git.repository.name,
       stylesheets: ['/a/index.css'],
-      scripts: ['/a/index.js']
+      scripts: ['/a/index.js'],
+      data: GitPeer::Repository.new(env).json(git.repository)
     )
   end
+
+  configure!
 end
 
 use Rack::Session::Cookie

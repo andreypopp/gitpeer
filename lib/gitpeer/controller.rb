@@ -1,7 +1,10 @@
 require 'scorched'
 require 'gitpeer/application'
+require 'gitpeer/context'
 
 class GitPeer::Controller < Scorched::Controller
+  include GitPeer::Context::Configurable
+
   config[:strip_trailing_slash] = :ignore
 
   ##
@@ -52,20 +55,32 @@ class GitPeer::Controller < Scorched::Controller
   class << self
 
     attr_accessor :parent
-    attr_accessor :mounted_prefix
+    attr_accessor :prefix
 
     def mounted(controller); end
 
     def configured; end
 
     def app
-      @app ||= begin
-        current = self
-        until current == Scorched::Controller or current < GitPeer::Application
-          current = self.parent
-        end
-        current < GitPeer::Application ? current : nil
+      @app ||= lineage.last
+    end
+
+    def mounted_at
+      @mounted_at ||= lineage
+        .reverse
+        .map { |p| p.prefix or '' }
+        .join
+        .gsub(/\/+/, '/')
+    end
+
+    def lineage
+      current = self
+      chain = [current]
+      until current == Scorched::Controller or current < GitPeer::Application
+        current = self.parent
+        chain << current
       end
+      chain
     end
 
     ##
@@ -98,9 +113,10 @@ class GitPeer::Controller < Scorched::Controller
     def mount(prefix, controller)
       if controller.is_a? Class and controller < GitPeer::Controller
         controller.config[:auto_pass] = true
-        controller.mounted(self) if controller.respond_to? :mounted
-        controller.parent = self if controller.respond_to? :parent=
-        controller.mounted_prefix = prefix if controller.respond_to? :mounted_prefix=
+        controller.mounted(self)
+        controller.parent = self
+        controller.prefix = prefix
+        inject controller if controller < GitPeer::Context::Configurable
       end
       self << {pattern: prefix, target: controller}
     end

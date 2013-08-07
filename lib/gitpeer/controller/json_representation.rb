@@ -1,4 +1,5 @@
 require 'json'
+require 'scorched/collection'
 require 'gitpeer/representation'
 require 'gitpeer/registry'
 
@@ -15,7 +16,7 @@ module GitPeer::Controller::JSONRepresentation
     end
 
     def self.uri(name)
-      proc { controller.uri_template(name) }
+      proc { controller.app.all_uri_templates[name] }
     end
 
     protected
@@ -29,51 +30,6 @@ module GitPeer::Controller::JSONRepresentation
       end
   end
 
-  def self.included(controller)
-    controller.extend(ClassMethods)
-  end
-
-  module ClassMethods
-    def representations
-      @representations ||= GitPeer::Registry.new()
-    end
-
-    def register_representation(cls, repr = nil, name: nil, override: false, &block)
-      raise ArgumentError, 'provide a representation' unless repr or block_given?
-      repr = Class::new(Representation, &block) unless repr
-      representations.register(repr, cls, name: name, override: override)
-    end
-
-    def get_representation(cls, name: nil, raise_on_missing: true)
-      now = self
-      until now == GitPeer::Controller do
-        unless now.respond_to? :representations
-          now = now.superclass
-          next
-        end
-        representation = now.representations.query(cls, name: name)
-        return representation if representation
-        now = now.superclass
-      end
-      raise GitPeer::Registry::LookupError, cls if raise_on_missing
-    end
-
-    def extend_representation(cls, name: nil, &block)
-      repr = representation(cls, name: name)
-      raise ArgumentError, "representation for #{cls} not found" unless repr
-      register_representation(cls, Class::new(repr, &block), name: name, override: true)
-    end
-
-    def representation(cls, representation = nil, name: nil, &block)
-      if block_given? or representation
-        register_representation(cls, representation, name: name, &block)
-      else
-        get_representation(cls, name: name)
-      end
-    end
-
-  end
-
   def body_as(cls)
     representation(cls).new(cls.new).from_json(request.body.read)
   end
@@ -84,11 +40,31 @@ module GitPeer::Controller::JSONRepresentation
 
   def json(obj, with: nil)
     response['Content-Type'] = 'application/json'
-    with = get_representation(obj.class, raise_on_missing: false) unless with
+    with = representation(obj.class) unless with
     if with
       with.new(obj, controller: self).to_json
     else
       obj.to_json
+    end
+  end
+
+  def self.included(controller)
+    controller.extend ClassMethods
+  end
+
+  module ClassMethods
+
+    def register_representation(cls, repr = nil, name: nil, extend: false, &block)
+      declare :representation, 
+        cls: cls, repr: repr, name: name, extend: extend, block: block
+    end
+
+    def representation(cls, representation = nil, name: nil, extend: false, &block)
+      if block_given? or representation
+        register_representation(cls, representation, name: name, extend: extend, &block)
+      else
+        app.all_representations.query(cls, name: name)
+      end
     end
   end
 end

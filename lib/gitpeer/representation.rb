@@ -129,6 +129,11 @@ class GitPeer::Representation
       self.links << options.merge(name: name, proc: block)
     end
 
+    def value(name, from: nil, repr: nil)
+      getter = Proc === from ? from : proc { @obj[from || name] }
+      self.prop(name, from: getter, repr: repr)
+    end
+
     def all_props
       lineage.map { |c| c.props }.flatten(1)
     end

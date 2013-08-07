@@ -21,6 +21,14 @@ describe GitPeer::Representation do
     }
   end
 
+  it 'represents values from hashes' do
+    repr_cls = Class.new(GitPeer::Representation) do
+      value :id
+    end
+    repr = repr_cls.new({id: 1})
+    repr.to_hash.should == {id: 1}
+  end
+
   it 'allows getting props from different name' do
     class Repr < GitPeer::Representation
       prop :a, from: :b
@@ -198,4 +206,5 @@ describe GitPeer::Representation do
     end
 
   end
+
 end

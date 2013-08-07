@@ -90,12 +90,13 @@ class GitPeer::Representation
     end
 
   class << self
-    attr_reader :props, :links
+    attr_reader :props, :links, :boundary
 
     def inherited(subclass)
       subclass.class_eval do
         @props = []
         @links = []
+        @boundary = false
       end
     end
 
@@ -104,7 +105,13 @@ class GitPeer::Representation
     end
 
     def prop(name, **options, &block)
-      options[:repr] = Class.new(GitPeer::Representation, &block) if block_given?
+      if block_given?
+        # we inject special "boundary" representation which prevents
+        # former variable declarations to have an effect on inline
+        # representation
+        options[:repr] = Class.new(self) { @boundary = true }
+        options[:repr] = Class.new(options[:repr], &block)
+      end
       self.props << options.merge(name: name)
     end
 
@@ -123,7 +130,7 @@ class GitPeer::Representation
     def lineage
       current = self
       chain = [current]
-      while current.superclass != GitPeer::Representation
+      until current.superclass == GitPeer::Representation or current.boundary
         current = self.superclass
         chain << current
       end

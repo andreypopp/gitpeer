@@ -57,12 +57,14 @@ class GitPeer::Representation
         instance_eval &link[:proc]
       elsif link[:template]
         template = link[:template]
+        template = instance_eval &template if Proc === template
         (template.is_a? URITemplate) ? template : URITemplate.new(template)
       elsif link[:href]
         link[:href]
       else
         raise RepresentationError.new("cannot generate link #{name} for #{obj}")
       end
+
 
       if value.is_a? URITemplate and not link[:templated]
         value = value.expand(props)
@@ -93,11 +95,11 @@ class GitPeer::Representation
       if is_collection
         value.map { |v|
           repr = representer_for(name, value, prop)
-          repr ? repr.new(v, **@context).to_hash : v
+          (repr && v) ? repr.new(v, **@context).to_hash : v
         }
       else
         repr = representer_for(name, value, prop)
-        repr ? repr.new(value, **@context).to_hash : value
+        (repr && value) ? repr.new(value, **@context).to_hash : value
       end
     end
 

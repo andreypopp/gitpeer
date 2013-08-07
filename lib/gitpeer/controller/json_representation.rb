@@ -1,53 +1,32 @@
 require 'json'
-require 'roar/decorator'
-require 'roar/representer/json'
-require 'roar/representer/json/hal'
+require 'gitpeer/representation'
 require 'gitpeer/registry'
 
 module GitPeer::Controller::JSONRepresentation
 
-  class Representation < Roar::Decorator
-    include Roar::Representer::JSON
-    include Roar::Representer::JSON::HAL
+  class Representation < GitPeer::Representation
 
-    def to_hash(options={})
-      @options = options
-      super(options)
+    def controller
+      @context[:controller]
     end
 
     def uri(name, **vars)
-      @options[:controller].uri(name, **vars)
+      controller.uri(name, **vars)
     end
 
-    class << self
-      def property(name, **options, &block)
-        if options[:resolve] and not options[:extend]
-          options[:extend] = lambda do |o, **local_options|
-            local_options[:controller].representation(o.class, name: options[:name])
-          end
-        end
-        super name, **options, &block
-      end
-
-      def value(name, **options, &block)
-        options[:getter] = lambda { |*| self[name] }
-        property name, **options, &block
-      end
-
-      def collection(name, **options, &block)
-        if options[:resolve] and not options[:extend]
-          options[:extend] = lambda do |o, **local_options|
-            local_options[:controller].representation(o.class, name: options[:name])
-          end
-        end
-        super name, **options, &block
-      end
-
-      def value_collection(name, **options, &block)
-        options[:getter] = lambda { |*| self[name] }
-        collection name, **options, &block
-      end
+    def self.uri(name)
+      proc { controller.uri_template(name) }
     end
+
+    protected
+
+      def representer_for(name, value, prop)
+        repr = prop[:repr]
+        if repr and not repr < GitPeer::Representation
+          repr = controller.representation(repr, name: prop[:repr_name]) 
+        end
+        repr
+      end
   end
 
   def self.included(controller)
@@ -56,24 +35,18 @@ module GitPeer::Controller::JSONRepresentation
 
   module ClassMethods
     def representations
-      return @representations if @representations
-      @representations = GitPeer::Registry.new()
-      @representations
+      @representations ||= GitPeer::Registry.new()
     end
 
-    def register_representation(cls, representation = nil, name: nil, override: false, &block)
-      unless representation or block_given?
-        raise ArgumentError, 'provide a representation'
-      end
-      unless representation
-        representation = Class::new(Representation, &block)
-      end
-      representations.register(representation, cls, name: name, override: override)
+    def register_representation(cls, repr = nil, name: nil, override: false, &block)
+      raise ArgumentError, 'provide a representation' unless repr or block_given?
+      repr = Class::new(Representation, &block) unless repr
+      representations.register(repr, cls, name: name, override: override)
     end
 
     def get_representation(cls, name: nil, raise_on_missing: true)
       now = self
-      while now do
+      until now == GitPeer::Controller do
         unless now.respond_to? :representations
           now = now.superclass
           next
@@ -86,9 +59,9 @@ module GitPeer::Controller::JSONRepresentation
     end
 
     def extend_representation(cls, name: nil, &block)
-      representation = representation(cls, name: name)
-      raise ArgumentError, "representation for #{cls} not found" unless representation
-      register_representation(cls, Class::new(representation, &block), name: name, override: true)
+      repr = representation(cls, name: name)
+      raise ArgumentError, "representation for #{cls} not found" unless repr
+      register_representation(cls, Class::new(repr, &block), name: name, override: true)
     end
 
     def representation(cls, representation = nil, name: nil, &block)
@@ -113,7 +86,7 @@ module GitPeer::Controller::JSONRepresentation
     response['Content-Type'] = 'application/json'
     with = get_representation(obj.class, raise_on_missing: false) unless with
     if with
-      with.new(obj).to_json(controller: self)
+      with.new(obj, controller: self).to_json
     else
       obj.to_json
     end

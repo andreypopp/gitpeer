@@ -40,6 +40,9 @@ class GitPeer::Auth < GitPeer::Controller
 
   def self.provider(klass, *args, &block)
     middleware << proc do
+      OmniAuth.configure do |config|
+        config.path_prefix = ''
+      end
       use OmniAuth::Builder do
         provider klass, *args, &block
       end

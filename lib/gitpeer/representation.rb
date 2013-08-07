@@ -31,10 +31,8 @@ class GitPeer::Representation
       result_links = {}
       links.each do |link|
         name = link[:name]
-
         next if links_seen.include? name
         links_seen << name
-
         href = represent_link(name, link, result.dup)
 
         result_links[name] = link

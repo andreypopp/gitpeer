@@ -89,14 +89,20 @@ class GitPeer::Representation
       end
 
       value = value.to_a if is_collection
-      if prop[:repr]
-        if is_collection
-          value = value.map { |e| prop[:repr].new(e, **@context).to_hash }
-        else
-          value = prop[:repr].new(value, **@context).to_hash
-        end
+
+      if is_collection
+        value.map { |v|
+          repr = representer_for(name, value, prop)
+          repr ? repr.new(v, **@context).to_hash : v
+        }
+      else
+        repr = representer_for(name, value, prop)
+        repr ? repr.new(value, **@context).to_hash : value
       end
-      value
+    end
+
+    def representer_for(name, value, prop)
+      prop[:repr]
     end
 
   class << self
@@ -145,8 +151,8 @@ class GitPeer::Representation
     def lineage
       current = self
       chain = [current]
-      until current.superclass == GitPeer::Representation or current.boundary
-        current = self.superclass
+      until current.superclass == GitPeer::Representation or current.superclass.boundary
+        current = current.superclass
         chain << current
       end
       chain

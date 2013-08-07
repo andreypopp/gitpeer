@@ -160,4 +160,10 @@ describe GitPeer::Representation do
     end
 
   end
+
+  it 'automatically generates representations for Structs' do
+    user = Struct.new(:name, :age)
+    repr = GitPeer::Representation.for_struct(user)
+    repr.new(user.new("Andrey", 27)).to_hash.should == {name: "Andrey", age: 27}
+  end
 end

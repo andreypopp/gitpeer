@@ -2,7 +2,6 @@ PATH
   remote: .
   specs:
     gitpeer (0.0.1)
-      github-linguist (~> 2.8.12)
       omniauth (~> 1.1.4)
       omniauth-github (~> 1.1.1)
       rugged (~> 0.19)
@@ -14,18 +13,11 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    charlock_holmes (0.6.9.4)
     daemons (1.1.9)
-    escape_utils (0.3.2)
     eventmachine (1.0.3)
     faraday (0.8.8)
       multipart-post (~> 1.2.0)
     ffi (1.9.0)
-    github-linguist (2.8.12)
-      charlock_holmes (~> 0.6.6)
-      escape_utils (~> 0.3.1)
-      mime-types (~> 1.19)
-      pygments.rb (~> 0.5.2)
     hashie (2.0.5)
     httpauth (0.2.0)
     jwt (0.1.8)
@@ -34,7 +26,6 @@ GEM
       rb-fsevent (>= 0.9.3)
       rb-inotify (>= 0.9)
       rb-kqueue (>= 0.2)
-    mime-types (1.23)
     multi_json (1.7.7)
     multipart-post (1.2.0)
     oauth2 (0.8.1)
@@ -52,10 +43,6 @@ GEM
     omniauth-oauth2 (1.1.1)
       oauth2 (~> 0.8.0)
       omniauth (~> 1.0)
-    posix-spawn (0.3.6)
-    pygments.rb (0.5.2)
-      posix-spawn (~> 0.3.6)
-      yajl-ruby (~> 1.1.0)
     rack (1.5.2)
     rack-accept (0.4.5)
       rack (>= 0.4)
@@ -80,7 +67,6 @@ GEM
       rack (>= 1.0.0)
     tilt (1.4.1)
     uri_template (0.5.3)
-    yajl-ruby (1.1.0)
 
 PLATFORMS
   ruby

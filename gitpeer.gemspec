@@ -21,7 +21,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rugged", "~> 0.19"
   spec.add_dependency "omniauth", "~> 1.1.4"
   spec.add_dependency "omniauth-github", "~> 1.1.1"
-  spec.add_dependency "github-linguist", "~> 2.8.12"
   spec.add_dependency "sqlite3", "~> 1.3.7"
   spec.add_dependency "sequel", "~> 4.0.0"
 

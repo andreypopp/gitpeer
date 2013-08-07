@@ -9,7 +9,8 @@ $ = require 'jqueryify'
 require 'backbone-query-parameters'
 
 core = require './components/core'
-{History, Comment, Contents, Commit, Tree, Blob, Issues, Issue} = require './models'
+{History, Comment, Contents, Repository,
+  Commit, Tree, Blob, Issues, Issue} = require './models'
 CommitView = require './components/commit_view'
 ContentsView = require './components/contents_view'
 HistoryView = require './components/history_view'
@@ -53,10 +54,10 @@ App = core.createComponent
         e.preventDefault()
         this.props.router.navigate(href, trigger: true)
 
-    this.props.router.on 'route:contents', (ref = 'master', path = '/') =>
+    this.props.router.on 'route:contents', (ref = this.props.repository.ref, path = '/') =>
       this.fetchAndShow new Contents(ref: ref, path: path)
 
-    this.props.router.on 'route:history', (ref = 'master', params = {}) =>
+    this.props.router.on 'route:history', (ref = this.props.repository.ref, params = {}) =>
       history = new History(ref: ref, limit: params.limit, after: params.after)
       this.fetchAndShow history
 
@@ -75,7 +76,7 @@ App = core.createComponent
   render: ->
     model = this.getModel()
     commit = model?.commit
-    name = window.__data?.name or 'project'
+    name = this.props.repository.name or 'project'
 
     `<div class="App">
       <header>
@@ -128,6 +129,7 @@ window.Backbone = require 'backbone'
 
 window.onload = ->
   GitPeer = window.GitPeer = {}
+  GitPeer.repository = repository = new Repository(__data, parse: true)
   GitPeer.Auth = Auth
   GitPeer.router = new Router
     routes:
@@ -141,7 +143,10 @@ window.onload = ->
       'issues/:id': 'issue'
       'issues': 'issues'
   GitPeer.app = core.renderComponent(
-    App(router: GitPeer.router, user: GitPeer.Auth.user()),
+    App
+      router: GitPeer.router
+      user: GitPeer.Auth.user()
+      repository: repository,
     document.body)
 
   GitPeer.Auth.on 'user', (user) ->

@@ -128,3 +128,6 @@ class exports.Issues extends Record
     state: null
     stats: null
     _links: null
+
+class exports.Repository extends Record
+  @define 'name', 'description', 'ref'

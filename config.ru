@@ -38,7 +38,7 @@ class App < GitPeer::Application
  
     extend_representation GitPeer::API::Issues::Issues do
       link :self_html, template: uri(:page_issues)
-      link :filtered_html do
+      link :filtered_html, templated: true do
         "#{uri :page_issues}{?state}"
       end
     end

@@ -110,7 +110,10 @@ class GitPeer::Issues < GitPeer::Controller
   end
 
   def self.db
-    config[:db]
+    @db ||= begin
+      db_uri = config[:db]
+      (db_uri.is_a? String) ? Sequel.connect(db_uri) : db_uri
+    end
   end
 
   def self.configured

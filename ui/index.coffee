@@ -81,7 +81,7 @@ App = core.createComponent
     `<div class="App">
       <header>
         <a class="name" href="/">{name}</a>
-        <Navigation router={this.props.router} />
+        <Navigation router={this.props.router} repository={this.props.repository} />
       </header>
       <AuthStatus user={this.props.user} />
       {this.viewFor(model)}
@@ -92,13 +92,8 @@ Navigation = core.createComponent
     this.props.router.on 'route', => this.forceUpdate()
 
   render: ->
-    _links = {
-      contents: {href: '/contents'},
-      history: {href: '/history'},
-      issues: {href: '/issues'},
-    }
-    links = for name, link of _links
-      `<a href={link.href}>{name}</a>`
+    links = for name, link of this.props.repository._links when link.title?
+      `<a href={link.href}>{link.title}</a>`
     `<div class="Navigation">{links}</div>`
 
 AuthStatus = core.createComponent
@@ -135,7 +130,7 @@ window.onload = ->
     routes:
       '': 'contents'
       'contents': 'contents'
-      'contents/:ref/*path': 'contents'
+      'contents/:ref*path': 'contents'
       'history': 'history'
       'history/:ref': 'history'
       'commit/:id': 'commit'

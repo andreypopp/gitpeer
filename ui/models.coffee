@@ -130,4 +130,4 @@ class exports.Issues extends Record
     _links: null
 
 class exports.Repository extends Record
-  @define 'name', 'description', 'ref'
+  @define 'name', 'description', 'ref', '_links'

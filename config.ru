@@ -26,7 +26,7 @@ class App < GitPeer::Application
   end
 
   issues = GitPeer::Issues.configure(db: 'sqlite://gitpeer.db')
-  git = GitPeer::Repository.configure(repo_path: '.')
+  git = GitPeer::Repository.configure(repo_path: '/mnt/host/home/git/gitpeer')
 
   mount '/api/issues',  issues
   mount '/api',         git

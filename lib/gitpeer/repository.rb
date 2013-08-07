@@ -180,11 +180,11 @@ class GitPeer::Repository < GitPeer::Controller
     end
 
     def self.git
-      Rugged::Repository.new("#{config[:repo_path]}/.git")
+      Rugged::Repository.new(config[:repo_path])
     end
 
     def prev_to_commit(ref_name, sha, limit)
-      filename = "#{config[:repo_path]}/.git/logs/refs/heads/#{ref_name}"
+      filename = "#{config[:repo_path]}/logs/refs/heads/#{ref_name}"
       commits = File.open(filename)
         .map { |line| line.split(' ')[0..1] }
         .drop_while { |shas| shas[0] != sha }

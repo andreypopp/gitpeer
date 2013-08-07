@@ -21,6 +21,8 @@ class App < GitPeer::Application
   uri :page_blob,          '/blob/{id}'
   uri :page_issues,        '/issues{?state}'
   uri :page_issue,         '/issues/{id}'
+  uri :page_wiki,          '/wiki{+page}'
+  uri :page_wiki_history,  '/wiki{+page}/history'
 
   auth = GitPeer::Auth.configure do
     provider :github,
@@ -52,6 +54,7 @@ class App < GitPeer::Application
     link :contents_html,  template: uri(:page_contents),  title: 'code'
     link :history_html,   template: uri(:page_history),   title: 'history'
     link :issues_html,    template: uri(:page_issues),    title: 'issues'
+    link :wiki_html,      template: uri(:page_wiki),      title: 'wiki'
   end
 
   representation Rugged::Commit, name: :basic, extend: true do

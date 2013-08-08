@@ -26,6 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "thin", "~> 1.5.1"
 
   spec.add_development_dependency "bundler", "~> 1.3"
+  spec.add_development_dependency "racksh"
   spec.add_development_dependency "rspec", "~> 1.3"
   spec.add_development_dependency "rerun", "~> 0.8"
 end

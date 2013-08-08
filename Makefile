@@ -7,7 +7,7 @@ run:
 		-- rackup -p $(PORT) --host $(HOST) -s thin
 
 shell::
-	@bundle exec irb
+	@bundle exec racksh
 
 test specs::
 	@rspec specs/
